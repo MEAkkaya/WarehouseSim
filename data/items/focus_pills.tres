@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_item"]
+[ext_resource type="PackedScene" path="res://assets/models/i_pills3.glb" id="2_model"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"focus_pills"
+display_name = "Focus Pills"
+edible = true
+energy_restore = 30.0
+size = 1
+weight = 0.05
+price = 15
+model = ExtResource("2_model")
+model_scale = 0.2
+placeholder_size = Vector3(0.14, 0.04, 0.05)
+placeholder_color = Color(0.8, 0.8, 0.8, 1)

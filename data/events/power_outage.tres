@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EventData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/events/power_outage_event.gd" id="2_effect"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"power_outage"
+title = "Power Outage"
+description = "Most of the warehouse is dark. Your flashlight is the only light you get."
+effect_script = ExtResource("2_effect")

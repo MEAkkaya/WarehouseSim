@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EventData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/events/safety_training_event.gd" id="2_effect"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"safety_training"
+title = "Workplace Safety Training"
+description = "The storeroom doors are closed for training. Use the obstacle course with lifts and moving platforms - and carry your packages through it."
+effect_script = ExtResource("2_effect")

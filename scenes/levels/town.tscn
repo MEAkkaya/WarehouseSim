@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/town_builder.gd" id="1_builder"]
+
+[ext_resource type="PackedScene" path="res://scenes/levels/trees.tscn" id="2_trees"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/home.tscn" id="3_home"]
+[ext_resource type="PackedScene" path="res://scenes/props/furniture_shop.tscn" id="4_shop"]
+[ext_resource type="PackedScene" path="res://scenes/props/bike.tscn" id="5_bike"]
+
+[node name="Town" type="Node3D"]
+script = ExtResource("1_builder")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Trees" parent="." instance=ExtResource("2_trees")]
+
+[node name="Home" parent="Props" instance=ExtResource("3_home")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 26, 0.09, 98)
+
+[node name="FurnitureShop" parent="Props" instance=ExtResource("4_shop")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 0.09, 95)
+
+[node name="Bike" parent="Props" instance=ExtResource("5_bike")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0.09, 97)

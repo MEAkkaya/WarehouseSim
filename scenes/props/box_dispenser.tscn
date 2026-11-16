@@ -1,0 +1,72 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/box_dispenser.gd" id="1_disp"]
+[ext_resource type="PackedScene" path="res://assets/models/pallet.glb" id="2_pallet"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_cardboard"]
+albedo_color = Color(0.72, 0.55, 0.33, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_stack"]
+material = SubResource("Mat_cardboard")
+size = Vector3(0.9, 0.12, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pile"]
+size = Vector3(1, 1.05, 1.5)
+
+[node name="BoxDispenser" type="StaticBody3D"]
+script = ExtResource("1_disp")
+prompt_text = "Take an empty box"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.525, 0)
+shape = SubResource("BoxShape3D_pile")
+
+[node name="Pallet" parent="." instance=ExtResource("2_pallet")]
+transform = Transform3D(0.27, 0, 0, 0, 0.27, 0, 0, 0, 0.27, 0, 0.1744, 0)
+
+[node name="Stacks" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.187, 0)
+
+[node name="Stack0" type="MeshInstance3D" parent="Stacks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
+mesh = SubResource("BoxMesh_stack")
+
+[node name="Stack1" type="MeshInstance3D" parent="Stacks"]
+transform = Transform3D(0.995, 0, 0.1, 0, 1, 0, -0.1, 0, 0.995, 0.02, 0.18, 0)
+mesh = SubResource("BoxMesh_stack")
+
+[node name="Stack2" type="MeshInstance3D" parent="Stacks"]
+transform = Transform3D(0.99, 0, -0.14, 0, 1, 0, 0.14, 0, 0.99, -0.02, 0.3, 0)
+mesh = SubResource("BoxMesh_stack")
+
+[node name="Stack3" type="MeshInstance3D" parent="Stacks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0)
+mesh = SubResource("BoxMesh_stack")
+
+[node name="Stack4" type="MeshInstance3D" parent="Stacks"]
+transform = Transform3D(0.995, 0, 0.1, 0, 1, 0, -0.1, 0, 0.995, 0.01, 0.54, 0)
+mesh = SubResource("BoxMesh_stack")
+
+[node name="Stack5" type="MeshInstance3D" parent="Stacks"]
+transform = Transform3D(0.99, 0, -0.14, 0, 1, 0, 0.14, 0, 0.99, 0, 0.66, 0)
+mesh = SubResource("BoxMesh_stack")
+
+[node name="Stack6" type="MeshInstance3D" parent="Stacks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, 0)
+mesh = SubResource("BoxMesh_stack")
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
+pixel_size = 0.003
+billboard = 2
+text = "BOXES"
+font_size = 48
+outline_size = 12
+
+[node name="StockLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38, 0)
+pixel_size = 0.002
+billboard = 2
+text = "7 / 7"
+font_size = 48
+outline_size = 10

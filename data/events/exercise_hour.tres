@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EventData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/events/exercise_hour_event.gd" id="2_effect"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"exercise_hour"
+title = "Mandatory Exercise Hour"
+description = "The boss has installed trampolines and treadmills to encourage employee fitness. Participation is not optional."
+effect_script = ExtResource("2_effect")

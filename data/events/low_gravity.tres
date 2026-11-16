@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EventData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/events/low_gravity_event.gd" id="2_effect"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"low_gravity"
+title = "Low Gravity"
+description = "Gravity has been reduced to save on shipping costs. You jump higher and dropped items float."
+effect_script = ExtResource("2_effect")

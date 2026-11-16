@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/box.tscn" id="1_box"]
+
+[node name="BoxBig" instance=ExtResource("1_box")]
+prompt_text = "Pick up big box"
+box_name = "big box"
+box_scale = Vector3(1, 1.5, 1)
+slot_layers = 2
+hold_offset = Vector3(0, -0.2, -0.3)

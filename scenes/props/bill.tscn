@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/bill.gd" id="1_bill"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_paper"]
+albedo_color = Color(0.96, 0.95, 0.88, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_paper"]
+material = SubResource("Mat_paper")
+size = Vector3(0.21, 0.006, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_paper"]
+size = Vector3(0.24, 0.03, 0.33)
+
+[node name="Bill" type="StaticBody3D"]
+script = ExtResource("1_bill")
+prompt_text = "Pick up bill"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+shape = SubResource("BoxShape3D_paper")
+
+[node name="Paper" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.004, 0)
+mesh = SubResource("BoxMesh_paper")

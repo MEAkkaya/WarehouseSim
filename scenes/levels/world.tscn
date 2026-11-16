@@ -1,0 +1,331 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/levels/town.tscn" id="2_town"]
+[ext_resource type="PackedScene" path="res://scenes/levels/warehouse.tscn" id="3_warehouse"]
+[ext_resource type="Script" path="res://scripts/world/day_night_cycle.gd" id="4_cycle"]
+[ext_resource type="Script" path="res://scripts/world/warehouse_site.gd" id="5_site"]
+[ext_resource type="Script" path="res://scripts/world/loading_yard.gd" id="6_yard"]
+[ext_resource type="Script" path="res://scripts/world/ceiling_lights.gd" id="8_lights"]
+[ext_resource type="Script" path="res://scripts/world/warehouse_outside.gd" id="7_outside"]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.55, 0.62, 0.7, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.75, 0.75, 0.8, 1)
+ambient_light_energy = 0.6
+fog_enabled = true
+fog_light_color = Color(0.55, 0.62, 0.7, 1)
+fog_density = 0.0045
+
+[sub_resource type="StandardMaterial3D" id="Mat_shell"]
+albedo_color = Color(0.6, 0.58, 0.55, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_lobby_floor"]
+albedo_color = Color(0.5, 0.5, 0.52, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nobike"]
+size = Vector3(4.4, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lobby"]
+size = Vector3(19.6, 14, 23.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_work"]
+size = Vector3(55.6, 14, 33.9)
+
+[node name="World" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, -0.38302222, 0.32139382, 0, 0.64278764, 0.76604444, -0.5, -0.66341394, 0.5566704, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
+light_color = Color(0.6, 0.7, 1, 1)
+light_energy = 0.0
+
+[node name="DayNightCycle" type="Node" parent="." node_paths=PackedStringArray("sun", "moon", "world_environment")]
+script = ExtResource("4_cycle")
+sun = NodePath("../Sun")
+moon = NodePath("../Moon")
+world_environment = NodePath("../WorldEnvironment")
+
+[node name="Town" parent="." instance=ExtResource("2_town")]
+
+[node name="WarehouseShell" type="Node3D" parent="."]
+
+[node name="WestWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.25, -2)
+use_collision = true
+size = Vector3(0.3, 6.5, 24)
+material = SubResource("Mat_shell")
+
+[node name="NorthWallOffice" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3.25, -14)
+use_collision = true
+size = Vector3(26, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="YRoomWestWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 3.25, -18.7)
+use_collision = true
+size = Vector3(0.3, 6.5, 9.4)
+material = SubResource("Mat_shell")
+
+[node name="YRoomNorthWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 3.25, -23.4)
+use_collision = true
+size = Vector3(30, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="YRoomEastWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 3.25, -21.2)
+use_collision = true
+size = Vector3(0.3, 6.5, 4.4)
+material = SubResource("Mat_shell")
+
+[node name="YRoomEastWallHeader" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 4.55, -18)
+use_collision = true
+size = Vector3(0.3, 3.9, 2)
+material = SubResource("Mat_shell")
+
+[node name="YRoomEastWall2" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 3.25, -15.5)
+use_collision = true
+size = Vector3(0.3, 6.5, 3)
+material = SubResource("Mat_shell")
+
+[node name="StockNorthWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 3.25, -19)
+use_collision = true
+size = Vector3(20, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="PassageSouthWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49, 3.25, -17)
+use_collision = true
+size = Vector3(6, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="StockWestWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52, 3.25, -6.6)
+use_collision = true
+size = Vector3(0.3, 6.5, 20.8)
+material = SubResource("Mat_shell")
+
+[node name="StockEastWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66, 3.25, -7.6)
+use_collision = true
+size = Vector3(0.3, 6.5, 22.8)
+material = SubResource("Mat_shell")
+
+[node name="StockSouthWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59, 3.25, 3.8)
+use_collision = true
+size = Vector3(14, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="NorthWallX" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 3.25, -14)
+use_collision = true
+size = Vector3(4, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="EastWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 3.25, -2)
+use_collision = true
+size = Vector3(0.3, 6.5, 24)
+material = SubResource("Mat_shell")
+
+[node name="SouthWallHall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3.25, 10)
+use_collision = true
+size = Vector3(8, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="SouthWallHallHeader" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.85, 10)
+use_collision = true
+size = Vector3(4, 3.3, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="SouthWallHall2" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3.25, 10)
+use_collision = true
+size = Vector3(8, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="SouthWallCorridor" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.2, 3.25, 10)
+use_collision = true
+size = Vector3(4.4, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="SouthWallCorridorHeader" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 4.05, 10)
+use_collision = true
+size = Vector3(1.2, 4.9, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="SouthWallCorridor2" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.8, 3.25, 10)
+use_collision = true
+size = Vector3(34.4, 6.5, 0.3)
+material = SubResource("Mat_shell")
+
+[node name="HallOfficeWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 3.25, 4)
+use_collision = true
+size = Vector3(2, 6.5, 0.2)
+material = SubResource("Mat_shell")
+
+[node name="HallOfficeWallHeader" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 4.55, 4)
+use_collision = true
+size = Vector3(2, 3.9, 0.2)
+material = SubResource("Mat_shell")
+
+[node name="HallOfficeWall2" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 3.25, 4)
+use_collision = true
+size = Vector3(16, 6.5, 0.2)
+material = SubResource("Mat_shell")
+
+[node name="WarehouseWall" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 3.25, -4.25)
+use_collision = true
+size = Vector3(0.2, 6.5, 19.5)
+material = SubResource("Mat_shell")
+
+[node name="WarehouseWallHeader" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4.75, 7)
+use_collision = true
+size = Vector3(0.2, 3.5, 3)
+material = SubResource("Mat_shell")
+
+[node name="WarehouseWall2" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 3.25, 9.25)
+use_collision = true
+size = Vector3(0.2, 6.5, 1.5)
+material = SubResource("Mat_shell")
+
+[node name="Roof" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 6.65, -6.7)
+use_collision = true
+size = Vector3(60.3, 0.3, 33.7)
+material = SubResource("Mat_shell")
+
+[node name="RoofStock" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 6.65, -7.6)
+use_collision = true
+size = Vector3(20.3, 0.3, 23.1)
+material = SubResource("Mat_shell")
+
+[node name="LobbyFloor" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+use_collision = true
+size = Vector3(20, 0.2, 24)
+material = SubResource("Mat_lobby_floor")
+
+[node name="InnerDoor" type="CSGBox3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.6, 7)
+use_collision = true
+size = Vector3(0.2, 3, 3)
+material = SubResource("Mat_shell")
+
+[node name="SignWarehouse" type="Label3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 10.25)
+pixel_size = 0.03
+text = "WAREHOUSE"
+font_size = 64
+outline_size = 12
+
+[node name="SignDoor" type="Label3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7, 10.25)
+pixel_size = 0.012
+text = "EMPLOYEES ENTRANCE"
+font_size = 64
+outline_size = 12
+
+[node name="SignOffice" type="Label3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 3, 4.15)
+pixel_size = 0.008
+text = "OFFICE"
+font_size = 64
+outline_size = 12
+
+[node name="SignLobby" type="Label3D" parent="WarehouseShell"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 9.8, 3.6, 7)
+pixel_size = 0.004
+text = "WAREHOUSE FLOOR - CLOCK IN"
+font_size = 64
+outline_size = 12
+
+[node name="SignLoading" type="Label3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 2.4, 10.25)
+pixel_size = 0.01
+text = "LOADING"
+font_size = 64
+outline_size = 12
+
+[node name="SignStock" type="Label3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59, 5, 3.95)
+pixel_size = 0.02
+text = "EXTRA STOCK"
+font_size = 64
+outline_size = 12
+
+[node name="BikeBarrier" type="StaticBody3D" parent="WarehouseShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 10.9)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WarehouseShell/BikeBarrier"]
+shape = SubResource("BoxShape3D_nobike")
+
+[node name="NoBikeSign" type="Label3D" parent="WarehouseShell/BikeBarrier"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0.3)
+pixel_size = 0.006
+text = "NO BIKES INSIDE"
+font_size = 64
+outline_size = 12
+
+[node name="LoadingYard" type="Node3D" parent="."]
+script = ExtResource("6_yard")
+
+[node name="WarehouseOutside" type="Node3D" parent="."]
+script = ExtResource("7_outside")
+
+[node name="CeilingLights" type="Node3D" parent="."]
+script = ExtResource("8_lights")
+
+[node name="WarehouseSite" type="Node3D" parent="." node_paths=PackedStringArray("interior_parent", "inner_door")]
+script = ExtResource("5_site")
+interior_scene = ExtResource("3_warehouse")
+interior_parent = NodePath("Interior")
+inner_door = NodePath("../WarehouseShell/InnerDoor")
+
+[node name="LobbyZone" type="Area3D" parent="WarehouseSite"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WarehouseSite/LobbyZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.1, -2)
+shape = SubResource("BoxShape3D_lobby")
+
+[node name="WorkZone" type="Area3D" parent="WarehouseSite"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WarehouseSite/WorkZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 6.1, -6.95)
+shape = SubResource("BoxShape3D_work")
+
+[node name="Interior" type="Node3D" parent="WarehouseSite"]
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 100)

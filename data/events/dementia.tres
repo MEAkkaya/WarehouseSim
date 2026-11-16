@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EventData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/events/dementia_event.gd" id="2_effect"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"dementia"
+title = "Dementia"
+description = "The boss has forgotten where everything goes. All the shelves have been shuffled for today."
+effect_script = ExtResource("2_effect")

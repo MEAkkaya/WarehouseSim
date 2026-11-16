@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EventData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/events/storage_overflow_event.gd" id="2_effect"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"storage_overflow"
+title = "Storage Overflow"
+description = "Boxes have started appearing everywhere. Climb the stacks, squeeze through gaps, and move boxes to make a path."
+effect_script = ExtResource("2_effect")

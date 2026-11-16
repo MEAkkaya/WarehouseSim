@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/box.gd" id="1_box"]
+[ext_resource type="PackedScene" path="res://assets/models/cardboardbox_open.glb" id="2_model"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_box"]
+size = Vector3(0.44, 0.425, 0.44)
+
+[node name="Box" type="StaticBody3D"]
+script = ExtResource("1_box")
+prompt_text = "Pick up box"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2125, 0)
+shape = SubResource("BoxShape3D_box")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(0.22, 0, 0, 0, 0.22, 0, 0, 0, 0.22, 0, 0, 0)
+
+[node name="Slots" type="Node3D" parent="."]

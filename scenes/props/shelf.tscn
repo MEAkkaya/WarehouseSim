@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/shelf.gd" id="1_shelf"]
+[ext_resource type="PackedScene" path="res://assets/models/boltlessshelf.glb" id="2_model"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_deck"]
+size = Vector3(1.4716, 0.05, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_post"]
+size = Vector3(0.08, 0.512, 0.08)
+
+[node name="Shelf" type="StaticBody3D"]
+script = ExtResource("1_shelf")
+
+[node name="DeckShape" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_deck")
+
+[node name="PostShape1" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.69, 0.221, -0.46)
+shape = SubResource("BoxShape3D_post")
+
+[node name="PostShape2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.69, 0.221, -0.46)
+shape = SubResource("BoxShape3D_post")
+
+[node name="PostShape3" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.69, 0.221, 0.46)
+shape = SubResource("BoxShape3D_post")
+
+[node name="PostShape4" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.69, 0.221, 0.46)
+shape = SubResource("BoxShape3D_post")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, -0.1763, 0, 0)
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0.52)
+pixel_size = 0.0018
+text = "A1"
+font_size = 48
+outline_size = 12

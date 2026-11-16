@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/furniture_shop.gd" id="1_shop"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_shop"]
+albedo_color = Color(0.3, 0.62, 0.85, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_shop"]
+material = SubResource("Mat_shop")
+size = Vector3(2.4, 2.4, 1.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shop"]
+size = Vector3(2.4, 2.4, 1.4)
+
+[node name="FurnitureShop" type="StaticBody3D"]
+script = ExtResource("1_shop")
+prompt_text = "Furniture shop"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+shape = SubResource("BoxShape3D_shop")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("BoxMesh_shop")
+
+[node name="Sign" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0)
+pixel_size = 0.008
+billboard = 2
+text = "FURNITURE SHOP"
+font_size = 64
+outline_size = 12

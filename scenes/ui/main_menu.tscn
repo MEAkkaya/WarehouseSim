@@ -1,0 +1,83 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.09, 0.11, 0.16, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Column" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/Column"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 46
+text = "WAREHOUSE WORKER"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 20
+text = "Save $1,000,000. Retire early."
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Center/Column"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="ContinueButton" type="Button" parent="Center/Column"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Continue"
+
+[node name="NewGameButton" type="Button" parent="Center/Column"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "New Game"
+
+[node name="SettingsButton" type="Button" parent="Center/Column"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Settings"
+
+[node name="ExitButton" type="Button" parent="Center/Column"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Exit"
+
+[node name="Hint" type="Label" parent="Center/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.55, 0.65, 1)
+text = "WASD move   Shift sprint   Space jump   Ctrl crouch   P phone
+Click interact / place item   Hold right click throw   F close/open box   Q put down
+R take item out of a box   T take the bill off a box"
+horizontal_alignment = 1

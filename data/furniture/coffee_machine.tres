@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="FurnitureData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/furniture_data.gd" id="1_furn"]
+
+[resource]
+script = ExtResource("1_furn")
+id = &"coffee_machine"
+display_name = "Coffee Machine"
+price = 1500
+sleep_restore = 0.0
+regen_multiplier = 1.3
+max_energy_bonus = 0.0
