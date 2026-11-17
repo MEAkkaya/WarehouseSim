@@ -18,11 +18,11 @@ enum Kind { SMOKE, GAMBLE }
 @export var bet: int = 50
 @export_range(0.0, 1.0) var win_chance: float = 0.45
 
-@onready var _label: Label3D = $Label
+@onready var _label: PaperLabel = $Label
 
 
 func _ready() -> void:
-	_label.text = "SMOKE BREAK" if kind == Kind.SMOKE else "POKER (bets: $%d)" % bet
+	_label.set_paper_text("SMOKE BREAK" if kind == Kind.SMOKE else "POKER (bets: $%d)" % bet)
 
 
 func can_interact(who: Node) -> bool:

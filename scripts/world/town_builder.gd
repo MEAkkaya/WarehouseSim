@@ -1,53 +1,44 @@
 class_name TownBuilder
 extends Node3D
-## Builds the blockout town from the data in TownLayout when the game starts:
-## ground, fields, roads, railway, lakes, the station, industrial buildings, the
-## neighbourhood, a shopping street, farms and the invisible world border. (Trees are
-## NOT generated: they are placed by hand in scenes/levels/trees.tscn.)
-##
-## Everything here is a grey-box stand-in. Real models are placed by hand under the
-## "Props" node (as scenes - see docs/WORLD_BUILDING.md); delete or shrink a
-## generated group when its real replacement exists.
-##
-## PERFORMANCE: houses, roofs, trees and flat road pieces are drawn with MultiMesh
-## (many copies of one mesh in a single draw call), grouped into 60 m chunks. A
-## chunk further than `view_distance` is not drawn at all, which is what keeps a
-## town with hundreds of buildings cheap. Fog hides where they fade out.
+## The town generator: only what is too numerous to place by hand. The world is ONE scene
+## (scenes/levels/world.tscn): the ground, roads, railway, lakes, fields, every building
+## (houses and apartment blocks, factories, shops, barns, station, the two special apartment
+## blocks), props and trees are ordinary nodes under `Town` that you see and move in the
+## editor. At game start this node
+##   - reads those nodes (TownLayout.scan), so nothing generated lands on them,
+##   - cuts the night club's stair shaft into the ground slab,
+##   - puts an invisible fence round the lakes,
+##   - lays sidewalks along every road and scatters vegetation (TownScenery, MultiMesh),
+##   - builds the world border and the scenery beyond it (Landscape).
+## Nodes in the group "editor_only" (reference boxes) are removed when the game starts.
 
-@export var random_seed: int = 7
+## The node with the hand-placed town (ground, roads, buildings...).
+@export var town_path: NodePath = ^"../Town"
 ## Chunks further away than this are hidden (should match the fog).
 @export var view_distance: float = 330.0
 
 const G := TownLayout.GROUND_TOP
-const CHUNK := 60.0
-## Every Nth lattice line of the neighbourhood is a street (the rest are rows of houses).
-const STREET_EVERY := 6
-## The neighbourhood's north-south streets run north up to the industrial road (z = 40,
-## 8 m wide) and end there.
-const STREET_NORTH_END := 44.0
-## Roughly this share of the neighbourhood's plots get an apartment block instead of a house.
-const APARTMENT_CHANCE := 0.16
-const SHOP_NAMES: Array[String] = ["PHARMACY", "NOODLES", "LAUNDRY", "PAWN SHOP", "BAKERY", "KEBAB", "TAILOR", "VIDEO RENTAL"]
 
-var _rng := RandomNumberGenerator.new()
 var _materials: Dictionary = {}
+var _town: Node = null
 ## Rectangles (x, z) of everything built so far, so later things avoid them.
 var _occupied: Array[Rect2] = []
+## Rectangles cut out of the ground for the lakes (see LakeBasin).
+var _lake_holes: Array[Rect2] = []
 
 
 func _ready() -> void:
-	_rng.seed = random_seed
-	_build_ground()
-	_build_fields()
-	_build_roads()
-	_build_rail()
+	_town = get_node_or_null(town_path)
+	if _town == null:
+		push_warning("TownBuilder: no town node at %s" % town_path)
+		return
+	for node in get_tree().get_nodes_in_group("editor_only"):
+		node.get_parent().remove_child(node)
+		node.queue_free()
+	TownLayout.scan(_town)
+	_collect_occupied()
 	_build_lakes()
-	_build_station()
-	_build_shops()
-	_build_industrial()
-	_build_farms()
-	_build_special_apartments()
-	_build_neighbourhood()
+	_build_ground()
 	_build_scenery()
 	_build_border()
 	_build_landscape()
@@ -94,17 +85,6 @@ func _solid_box(parent: Node3D, center: Vector3, size: Vector3, color: Color,
 	parent.add_child(holder)
 
 
-func _label(parent: Node3D, text: String, at: Vector3, pixel_size: float = 0.012) -> void:
-	var label := Label3D.new()
-	label.text = text
-	label.pixel_size = pixel_size
-	label.font_size = 56
-	label.outline_size = 12
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position = at
-	parent.add_child(label)
-
-
 func _group(group_name: String) -> Node3D:
 	var node := Node3D.new()
 	node.name = group_name
@@ -112,108 +92,85 @@ func _group(group_name: String) -> Node3D:
 	return node
 
 
-## Draws many boxes/cones/... with one mesh as MultiMesh chunks. Each instance is
-## a Dictionary: center (Vector3), size (Vector3), yaw (float), color (Color) and
-## optionally `col` (Vector3): a collision box size. With `collide`, instances get a
-## box collider (the instance's own size unless `col` is given).
-func _spawn_batches(parent: Node3D, mesh: Mesh, instances: Array, collide: bool) -> void:
-	var chunks := {}
-	for inst in instances:
-		var center: Vector3 = inst.center
-		var key := Vector2i(floori(center.x / CHUNK), floori(center.z / CHUNK))
-		if not chunks.has(key):
-			chunks[key] = []
-		chunks[key].append(inst)
-	for key in chunks:
-		var list: Array = chunks[key]
-		var multimesh := MultiMesh.new()
-		multimesh.transform_format = MultiMesh.TRANSFORM_3D
-		multimesh.use_colors = true
-		multimesh.mesh = mesh
-		multimesh.instance_count = list.size()
-		var body: StaticBody3D = null
-		if collide:
-			body = StaticBody3D.new()
-			body.name = "Colliders_%d_%d" % [key.x, key.y]
-		for i in list.size():
-			var inst: Dictionary = list[i]
-			var basis := Basis(Vector3.UP, inst.yaw).scaled_local(inst.size)
-			multimesh.set_instance_transform(i, Transform3D(basis, inst.center))
-			multimesh.set_instance_color(i, inst.color)
-			if collide:
-				var size: Vector3 = inst.size
-				var at: Vector3 = inst.center
-				if inst.has("col"):
-					size = inst.col
-					at = Vector3(at.x, G + size.y / 2.0, at.z)
-				var shape := CollisionShape3D.new()
-				var box := BoxShape3D.new()
-				box.size = size
-				shape.shape = box
-				shape.transform = Transform3D(Basis(Vector3.UP, inst.yaw), at)
-				body.add_child(shape)
-		var holder := MultiMeshInstance3D.new()
-		holder.name = "Chunk_%d_%d" % [key.x, key.y]
-		holder.multimesh = multimesh
-		holder.material_override = _material(Color.WHITE, true)
-		holder.visibility_range_end = view_distance
-		holder.visibility_range_end_margin = 25.0
-		holder.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		parent.add_child(holder)
-		if body != null:
-			parent.add_child(body)
-
-
-func _instance(center: Vector3, size: Vector3, yaw: float, color: Color) -> Dictionary:
-	return {"center": center, "size": size, "yaw": yaw, "color": color}
-
-
 func _rect_of(x: float, z: float, w: float, d: float) -> Rect2:
 	return Rect2(x - w / 2.0, z - d / 2.0, w, d)
 
 
-## Is this footprint free of roads/lakes/keep-outs and of everything built so far?
-func _free_spot(rect: Rect2, margin: float) -> bool:
-	if not TownLayout.rect_is_clear(rect, margin):
-		return false
-	for other in _occupied:
-		if other.grow(margin).intersects(rect):
-			return false
-	return true
+# ---- What is already standing ------------------------------------------------------
+
+## Fills `_occupied` from the scene: every mesh under Buildings and Props, the lakes and the
+## two special apartment blocks (whose rooms are built in code, so they are measured by hand).
+func _collect_occupied() -> void:
+	for lake in TownLayout.LAKES:
+		_occupied.append(Rect2(lake.center - lake.radius, lake.radius * 2.0))
+	for holder_name in ["Buildings", "Props"]:
+		var holder := _town.get_node_or_null(holder_name)
+		if holder != null:
+			_collect_footprints(holder)
 
 
-# ---- Ground, fields, roads, rail -------------------------------------------------
+func _collect_footprints(node: Node) -> void:
+	if node is ApartmentBuilding:
+		var spot := Vector2((node as Node3D).global_position.x, (node as Node3D).global_position.z)
+		_occupied.append(_rect_of(spot.x, spot.y, 9.0, 8.0))
+		if node is ClubApartment:
+			# the club's back door opens on a yard where no house stands
+			_occupied.append(_rect_of(spot.x, spot.y - 8.5, 11.0, 9.0))
+		return
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		_occupied.append(TownLayout.footprint(node as MeshInstance3D))
+	for child in node.get_children():
+		_collect_footprints(child)
 
+
+# ---- Ground, lakes -------------------------------------------------------------------
+
+## The ground slab in the scene is one big box. The night club's stair shaft and the lakes are
+## holes in it, so the slab is replaced by pieces around the holes (same colour, same height).
 func _build_ground() -> void:
-	var group := _group("Ground")
-	# A huge slab (far bigger than the border) so no edge is ever visible through the fog.
-	var bounds := TownLayout.BOUNDS
-	var center := bounds.get_center()
-	# (With holes: the stair shaft of the night club goes down through the ground.)
-	var pieces: Array[Rect2] = [Rect2(center.x - 800.0, center.y - 800.0, 1600.0, 1600.0)]
-	for hole in TownLayout.ground_holes():
+	var ground := _town.get_node_or_null("Ground") as StaticBody3D
+	if ground == null:
+		return
+	var mesh_node: MeshInstance3D = null
+	for child in ground.get_children():
+		if child is MeshInstance3D:
+			mesh_node = child
+			break
+	if mesh_node == null:
+		return
+	var rect := TownLayout.footprint(mesh_node)
+	var box := mesh_node.global_transform * mesh_node.get_aabb()
+	var color := Color(0.36, 0.52, 0.32)
+	if mesh_node.mesh.material is StandardMaterial3D:
+		color = (mesh_node.mesh.material as StandardMaterial3D).albedo_color
+	var pieces: Array[Rect2] = [rect]
+	var holes: Array[Rect2] = TownLayout.ground_holes()
+	holes.append_array(_lake_holes)
+	for hole in holes:
 		var next: Array[Rect2] = []
 		for piece in pieces:
 			next.append_array(_carve(piece, hole))
 		pieces = next
+	if pieces.size() == 1 and pieces[0] == rect:
+		return  # no hole in this slab: leave it as it is
+	ground.get_parent().remove_child(ground)
+	ground.queue_free()
+	var group := _group("Ground")
 	for piece in pieces:
-		_solid_box(group, Vector3(piece.get_center().x, G - 0.1, piece.get_center().y),
-				Vector3(piece.size.x, 0.2, piece.size.y), Color(0.36, 0.52, 0.32))
-	# Industrial paving under the warehouse area.
-	var ind := TownLayout.INDUSTRIAL
-	_solid_box(group, Vector3(ind.get_center().x, G - 0.095, ind.get_center().y),
-			Vector3(ind.size.x, 0.2, ind.size.y), Color(0.5, 0.5, 0.52), 0.0, false)
+		_solid_box(group, Vector3(piece.get_center().x, box.position.y + box.size.y / 2.0, piece.get_center().y),
+				Vector3(piece.size.x, box.size.y, piece.size.y), color)
 
 
 ## `rect` minus `hole`, as up to four rectangles (or `rect` itself when they do not touch).
 func _carve(rect: Rect2, hole: Rect2) -> Array[Rect2]:
 	if not rect.intersects(hole):
 		return [rect]
+	var cut := rect.intersection(hole)   # (the hole may stick out of the rectangle)
 	var parts: Array[Rect2] = []
-	parts.append(Rect2(rect.position.x, rect.position.y, hole.position.x - rect.position.x, rect.size.y))
-	parts.append(Rect2(hole.end.x, rect.position.y, rect.end.x - hole.end.x, rect.size.y))
-	parts.append(Rect2(hole.position.x, rect.position.y, hole.size.x, hole.position.y - rect.position.y))
-	parts.append(Rect2(hole.position.x, hole.end.y, hole.size.x, rect.end.y - hole.end.y))
+	parts.append(Rect2(rect.position.x, rect.position.y, cut.position.x - rect.position.x, rect.size.y))
+	parts.append(Rect2(cut.end.x, rect.position.y, rect.end.x - cut.end.x, rect.size.y))
+	parts.append(Rect2(cut.position.x, rect.position.y, cut.size.x, cut.position.y - rect.position.y))
+	parts.append(Rect2(cut.position.x, cut.end.y, cut.size.x, rect.end.y - cut.end.y))
 	var result: Array[Rect2] = []
 	for part in parts:
 		if part.size.x > 0.01 and part.size.y > 0.01:
@@ -221,303 +178,60 @@ func _carve(rect: Rect2, hole: Rect2) -> Array[Rect2]:
 	return result
 
 
-func _build_fields() -> void:
-	var group := _group("Fields")
-	for field in TownLayout.FIELDS:
-		var rect: Rect2 = field.rect
-		_solid_box(group, Vector3(rect.get_center().x, G - 0.09, rect.get_center().y),
-				Vector3(rect.size.x, 0.2, rect.size.y), field.color, 0.0, false)
-
-
-func _build_roads() -> void:
-	var group := _group("Roads")
-	var pieces: Array = []
-	for road in TownLayout.ROADS:
-		var points: PackedVector2Array = road.points
-		for i in points.size() - 1:
-			var a := points[i]
-			var b := points[i + 1]
-			var center := (a + b) / 2.0
-			pieces.append(_instance(Vector3(center.x, G - 0.088, center.y),
-					Vector3(a.distance_to(b) + road.width, 0.2, road.width), _yaw_between(a, b), Color(0.27, 0.27, 0.3)))
-	# The neighbourhood's own streets: short pieces so they stop at the railway / lakes.
-	# They do not end with the neighbourhood: they run on to the edge of the map (where the
-	# invisible walls are), or to the industrial road, so they look like they lead somewhere.
-	var origin := _neighbourhood_origin()
-	var pitch := _house_pitch()
-	var bounds := TownLayout.BOUNDS
-	for i in range(0, 16, STREET_EVERY):
-		var x := origin.x + i * pitch.x
-		var z := bounds.position.y
-		while z < bounds.end.y:
-			if _is_street_ok(Vector2(x, z)):
-				pieces.append(_instance(Vector3(x, G - 0.085, z), Vector3(5, 0.2, 5.2), 0.0, Color(0.27, 0.27, 0.3)))
-			z += 5.0
-	for j in range(0, 16, STREET_EVERY):
-		var z := origin.y + j * pitch.y
-		var x := bounds.position.x
-		while x < bounds.end.x:
-			if _is_street_ok(Vector2(x, z)):
-				pieces.append(_instance(Vector3(x, G - 0.085, z), Vector3(5.2, 0.2, 5), 0.0, Color(0.27, 0.27, 0.3)))
-			x += 5.0
-	_spawn_batches(group, _unit_box(), pieces, false)
-
-
-## A street piece is fine where it is not on the railway, a lake or the border.
-func _is_street_ok(p: Vector2) -> bool:
-	if TownLayout.distance_to_polyline(p, TownLayout.RAIL) < TownLayout.RAIL_HALF_WIDTH + 4.0:
-		return false
-	for lake in TownLayout.LAKES:
-		if TownLayout.ellipse_value(p, lake.center, lake.radius) < 1.15:
-			return false
-	if TownLayout.KEEP_OUT[2].has_point(p):
-		return false  # the station
-	if p.y < STREET_NORTH_END:
-		return false  # the streets end at the industrial road
-	return TownLayout.BOUNDS.grow(-2.0).has_point(p)
-
-
-func _unit_box() -> BoxMesh:
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3.ONE
-	return mesh
-
-
-func _build_rail() -> void:
-	var group := _group("Railway")
-	var rail := TownLayout.RAIL
-	var pieces: Array = []
-	for i in rail.size() - 1:
-		var a := rail[i]
-		var b := rail[i + 1]
-		var center := (a + b) / 2.0
-		var yaw := _yaw_between(a, b)
-		var length := a.distance_to(b) + 3.0
-		pieces.append(_instance(Vector3(center.x, G + 0.05, center.y), Vector3(length, 0.3, 5.5), yaw, Color(0.42, 0.4, 0.38)))
-		for side: float in [-0.72, 0.72]:
-			var offset := Vector2(-sin(yaw), -cos(yaw)) * side
-			pieces.append(_instance(Vector3(center.x + offset.x, G + 0.28, center.y + offset.y),
-					Vector3(length, 0.14, 0.14), yaw, Color(0.12, 0.12, 0.14)))
-	_spawn_batches(group, _unit_box(), pieces, false)
-
-
-# ---- Lakes -----------------------------------------------------------------------
-
+## Digs the lakes (LakeBasin: bed, banks, sand, water with depth) and fences the shore, so
+## nobody walks onto the water. The TownLake node is lowered to the water level and gets the
+## water shader; the flat sand disc of the scene is replaced by the sand of the bank.
 func _build_lakes() -> void:
 	var group := _group("Lakes")
+	var holder := _town.get_node_or_null("Lakes")
+	if holder == null:
+		return
+	var basin := LakeBasin.new()
+	basin.name = "Basins"
+	group.add_child(basin)
+	var water := ShaderMaterial.new()
+	water.shader = load("res://assets/shaders/lake_water.gdshader")
+	var sands: Array[Node] = []
+	var lake_nodes: Array[TownLake] = []
+	for node in holder.get_children():
+		var lake := node as TownLake
+		if lake == null:
+			continue
+		var sand := holder.get_node_or_null(String(lake.name) + "Sand") as MeshInstance3D
+		if sand == null and lake.beach:
+			sand = holder.get_node_or_null("BeachSand") as MeshInstance3D
+		basin.lakes.append(LakeBasin.describe(lake, sand))
+		lake_nodes.append(lake)
+		if sand != null:
+			sands.append(sand)
+	for index in lake_nodes.size():
+		basin.build(index)
+		_lake_holes.append(LakeBasin.hole_rect(basin.lakes[index]))
+		# the water: a hair wider than the shore line, so the bank hides its edge
+		var lake := lake_nodes[index]
+		lake.material_override = water
+		lake.scale = Vector3(lake.scale.x * 1.03, lake.scale.y, lake.scale.z * 1.03)
+		lake.global_position.y = LakeBasin.water_level() - 0.02
+	for sand in sands:
+		sand.get_parent().remove_child(sand)
+		sand.queue_free()
 	for lake in TownLayout.LAKES:
 		var center: Vector2 = lake.center
 		var radius: Vector2 = lake.radius
-		if lake.beach:
-			# Sand ring, a bit bigger than the water, a little stronger on the north side.
-			_disc(group, Vector2(center.x, center.y - 6.0), radius + Vector2(9, 9), G + 0.02, Color(0.83, 0.77, 0.57))
-		_disc(group, center, radius, G + 0.05, Color(0.14, 0.26, 0.43))
-		_occupied.append(Rect2(center - radius, radius * 2.0))
-		# Invisible fence around the shore so nobody walks onto the water.
 		var barrier := StaticBody3D.new()
 		barrier.name = "ShoreBarrier"
 		group.add_child(barrier)
 		var segments := 40
 		for k in segments:
-			var a := Vector2(cos(TAU * k / segments), sin(TAU * k / segments)) * radius * 0.97 + center
-			var b := Vector2(cos(TAU * (k + 1) / segments), sin(TAU * (k + 1) / segments)) * radius * 0.97 + center
+			var a := Vector2(cos(TAU * k / segments), sin(TAU * k / segments)) * radius + center
+			var b := Vector2(cos(TAU * (k + 1) / segments), sin(TAU * (k + 1) / segments)) * radius + center
 			var shape := CollisionShape3D.new()
 			var box := BoxShape3D.new()
 			box.size = Vector3(a.distance_to(b) + 0.5, 4.0, 2.0)
 			shape.shape = box
 			shape.transform = Transform3D(Basis(Vector3.UP, _yaw_between(a, b)),
-					Vector3((a.x + b.x) / 2.0, 2.0, (a.y + b.y) / 2.0))
+					Vector3((a.x + b.x) / 2.0, 1.0, (a.y + b.y) / 2.0))
 			barrier.add_child(shape)
-
-
-func _disc(parent: Node3D, center: Vector2, radius: Vector2, y: float, color: Color) -> void:
-	var instance := MeshInstance3D.new()
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = 1.0
-	mesh.bottom_radius = 1.0
-	mesh.height = 0.04
-	mesh.radial_segments = 56
-	mesh.rings = 1
-	mesh.material = _material(color)
-	instance.mesh = mesh
-	instance.scale = Vector3(radius.x, 1.0, radius.y)
-	instance.position = Vector3(center.x, y, center.y)
-	parent.add_child(instance)
-
-
-# ---- Station ---------------------------------------------------------------------
-
-func _build_station() -> void:
-	var group := _group("TrainStation")
-	var rail := TownLayout.RAIL
-	var a := rail[5]
-	var b := rail[6]
-	var mid := (a + b) / 2.0
-	var along := (b - a).normalized()
-	var west := Vector2(along.y, -along.x)  # perpendicular
-	if west.x > 0.0:
-		west = -west
-	var yaw := _yaw_between(a, b)
-	var platform := mid + west * 6.0
-	_solid_box(group, Vector3(platform.x, G + 0.25, platform.y), Vector3(28, 0.5, 5), Color(0.7, 0.68, 0.62), yaw)
-	var building := mid + west * 15.0
-	_solid_box(group, Vector3(building.x, G + 2.7, building.y), Vector3(16, 5, 8), Color(0.72, 0.7, 0.64), yaw)
-	_label(group, "TRAIN STATION - UNDER CONSTRUCTION", Vector3(building.x, G + 8.0, building.y))
-	# Orange barriers around the construction.
-	for offset: float in [-12.0, 12.0]:
-		for side: float in [10.5, 20.5]:
-			var p := mid + along * offset + west * side
-			_solid_box(group, Vector3(p.x, G + 0.6, p.y), Vector3(2.4, 1.2, 0.4), Color(0.95, 0.5, 0.1), yaw)
-	# A train car waiting on the rails.
-	_solid_box(group, Vector3(mid.x, G + 2.2, mid.y), Vector3(21, 3.6, 3.0), Color(0.0, 0.64, 0.92), yaw)
-	_label(group, "TRAIN", Vector3(mid.x, G + 5.5, mid.y))
-	_occupied.append(Rect2(mid - Vector2(30, 30), Vector2(60, 60)))
-
-
-# ---- Buildings ---------------------------------------------------------------------
-
-func _build_shops() -> void:
-	var group := _group("Shops")
-	var shops: Array = []
-	for side: int in [-1, 1]:
-		for z: int in [98, 110, 122]:
-			var center := Vector2(side * 11.0, z)
-			shops.append(_instance(Vector3(center.x, G + 2.3, center.y), Vector3(8, 4.6, 7), 0.0, Color(0.3, 0.62, 0.85)))
-			_occupied.append(_rect_of(center.x, center.y, 8, 7))
-			_label(group, "SHOP", Vector3(center.x, G + 6.2, center.y), 0.01)
-	_spawn_batches(group, _unit_box(), shops, true)
-
-
-func _build_industrial() -> void:
-	var group := _group("Industrial")
-	# Keep the industrial estate's buildings off the neighbourhood streets that run up to
-	# the industrial road.
-	var street_origin := _neighbourhood_origin()
-	for i in range(0, 16, STREET_EVERY):
-		var street_x := street_origin.x + i * _house_pitch().x
-		_occupied.append(Rect2(street_x - 3.6, STREET_NORTH_END - 4.0, 7.2, 20.0))
-	_label(group, "INDUSTRIAL ESTATE", Vector3(30, 22, -62), 0.03)
-	var buildings: Array = []
-	var area := TownLayout.INDUSTRIAL
-	var palette := [Color(0.62, 0.64, 0.68), Color(0.78, 0.78, 0.8), Color(0.5, 0.55, 0.62), Color(0.7, 0.62, 0.55)]
-	var attempts := 0
-	while buildings.size() < 15 and attempts < 600:
-		attempts += 1
-		var size := Vector3(_rng.randf_range(18, 42), _rng.randf_range(7, 13), _rng.randf_range(16, 34))
-		var center := Vector2(_rng.randf_range(area.position.x + 5, area.end.x - 5), _rng.randf_range(area.position.y + 5, area.end.y - 5))
-		var rect := _rect_of(center.x, center.y, size.x, size.z)
-		if not _free_spot(rect, 4.0):
-			continue
-		_occupied.append(rect)
-		buildings.append(_instance(Vector3(center.x, G + size.y / 2.0, center.y), size, 0.0, palette[_rng.randi() % palette.size()]))
-	_spawn_batches(group, _unit_box(), buildings, true)
-
-
-func _build_farms() -> void:
-	var group := _group("Farms")
-	var farm_centers: Array[Vector2] = [Vector2(265, 100), Vector2(320, 190), Vector2(262, -62)]
-	var barns: Array = []
-	for farm in farm_centers:
-		for k in 3:
-			var center := farm + Vector2(_rng.randf_range(-14, 14), _rng.randf_range(-12, 12))
-			var size := Vector3(_rng.randf_range(8, 16), _rng.randf_range(4, 7), _rng.randf_range(8, 14))
-			var rect := _rect_of(center.x, center.y, size.x, size.z)
-			if not _free_spot(rect, 2.0):
-				continue
-			_occupied.append(rect)
-			barns.append(_instance(Vector3(center.x, G + size.y / 2.0, center.y), size, 0.0, Color(0.62, 0.3, 0.25)))
-	_spawn_batches(group, _unit_box(), barns, true)
-
-
-## The two hand-made apartment buildings (gambling room, night club) and their lots.
-func _build_special_apartments() -> void:
-	var group := _group("SpecialApartments")
-	var gambling := GamblingApartment.new()
-	gambling.name = "GamblingApartment"
-	gambling.position = Vector3(TownLayout.GAMBLING_SPOT.x, G, TownLayout.GAMBLING_SPOT.y)
-	group.add_child(gambling)
-	var club := ClubApartment.new()
-	club.name = "ClubApartment"
-	club.position = Vector3(TownLayout.CLUB_SPOT.x, G, TownLayout.CLUB_SPOT.y)
-	group.add_child(club)
-	# Keep houses off the buildings and off the club's back yard.
-	for spot in [TownLayout.GAMBLING_SPOT, TownLayout.CLUB_SPOT]:
-		_occupied.append(_rect_of(spot.x, spot.y, 9.0, 8.0))
-	_occupied.append(_rect_of(TownLayout.CLUB_SPOT.x, TownLayout.CLUB_SPOT.y - 8.5, 11.0, 9.0))
-
-
-func _neighbourhood_origin() -> Vector2:
-	return Vector2(TownLayout.NEIGHBOURHOOD.position.x + 2.0, TownLayout.NEIGHBOURHOOD.position.y + 2.0)
-
-
-func _house_pitch() -> Vector2:
-	return Vector2(9.0, 8.0)
-
-
-func _build_neighbourhood() -> void:
-	var group := _group("Houses")
-	var origin := _neighbourhood_origin()
-	var pitch := _house_pitch()
-	var area := TownLayout.NEIGHBOURHOOD
-	var walls: Array = []
-	var roofs: Array = []
-	var glass: Array = []
-	var apartments := 0
-	# A separate random stream, so adding apartments does not move any house.
-	var apt_rng := RandomNumberGenerator.new()
-	apt_rng.seed = random_seed + 99
-	var wall_colors := [Color(0.86, 0.78, 0.66), Color(0.78, 0.6, 0.55), Color(0.62, 0.72, 0.64), Color(0.8, 0.8, 0.74), Color(0.7, 0.66, 0.6)]
-	var roof_colors := [Color(0.55, 0.27, 0.22), Color(0.35, 0.3, 0.3), Color(0.5, 0.36, 0.25)]
-	var columns := int(area.size.x / pitch.x)
-	var rows := int(area.size.y / pitch.y)
-	for i in columns:
-		for j in rows:
-			if i % STREET_EVERY == 0 or j % STREET_EVERY == 0:
-				continue  # these lattice lines are streets
-			var size := Vector3(_rng.randf_range(5.4, 7.0), _rng.randf_range(4.0, 5.5), _rng.randf_range(5.0, 6.3))
-			var center := Vector2(origin.x + i * pitch.x + _rng.randf_range(-0.6, 0.6), origin.y + j * pitch.y + _rng.randf_range(-0.5, 0.5))
-			var is_apartment := apt_rng.randf() < APARTMENT_CHANCE
-			if is_apartment:
-				size = Vector3(apt_rng.randf_range(7.0, 8.2), apt_rng.randf_range(9.0, 13.0), apt_rng.randf_range(6.4, 7.2))
-			var rect := _rect_of(center.x, center.y, size.x, size.z)
-			if not _free_spot(rect, 0.8) or not area.encloses(rect):
-				continue
-			_occupied.append(rect)
-			var wall_color: Color = wall_colors[_rng.randi() % wall_colors.size()]
-			if is_apartment:
-				# Apartment block: a shop on the ground floor (shopfront glass), flats above
-				# (bands of windows), a flat roof.
-				apartments += 1
-				walls.append(_instance(Vector3(center.x, G + size.y / 2.0, center.y), size, 0.0, wall_color.darkened(0.12)))
-				glass.append(_instance(Vector3(center.x, G + 1.5, center.y + size.z / 2.0 + 0.03),
-						Vector3(size.x - 1.0, 2.2, 0.08), 0.0, Color(0.95, 0.82, 0.5)))
-				for storey in range(1, int(size.y / 3.2)):
-					glass.append(_instance(Vector3(center.x, G + storey * 3.2 + 1.8, center.y + size.z / 2.0 + 0.03),
-							Vector3(size.x - 1.2, 1.1, 0.08), 0.0, Color(0.25, 0.35, 0.5)))
-				roofs.append(_instance(Vector3(center.x, G + size.y + 0.15, center.y),
-						Vector3(size.x + 0.4, 0.3, size.z + 0.4), 0.0, Color(0.3, 0.3, 0.33)))
-				_label(group, SHOP_NAMES[apt_rng.randi() % SHOP_NAMES.size()],
-						Vector3(center.x, G + 3.4, center.y + size.z / 2.0 + 0.2), 0.007)
-				continue
-			walls.append(_instance(Vector3(center.x, G + size.y / 2.0, center.y), size, 0.0, wall_color))
-			var roof_height := 2.4
-			roofs.append(_instance(Vector3(center.x, G + size.y + roof_height / 2.0, center.y),
-					Vector3(size.x + 0.8, roof_height, size.z + 0.6), 0.0, roof_colors[_rng.randi() % roof_colors.size()]))
-	_spawn_batches(group, _unit_box(), walls, true)
-	_spawn_batches(group, _unit_box(), glass, false)
-	# Flat apartment roofs are boxes, house roofs are prisms: split the list by shape.
-	var prism_roofs: Array = []
-	var flat_roofs: Array = []
-	for roof in roofs:
-		if (roof.size as Vector3).y < 1.0:
-			flat_roofs.append(roof)
-		else:
-			prism_roofs.append(roof)
-	var roof_mesh := PrismMesh.new()
-	roof_mesh.size = Vector3.ONE
-	_spawn_batches(group, roof_mesh, prism_roofs, false)
-	_spawn_batches(group, _unit_box(), flat_roofs, false)
-	print("TownBuilder: ", walls.size() - apartments, " houses, ", apartments, " apartment blocks")
 
 
 # ---- Sidewalks and vegetation ----------------------------------------------------------
@@ -526,15 +240,11 @@ func _build_scenery() -> void:
 	var scenery := TownScenery.new()
 	scenery.name = "Scenery"
 	scenery.occupied = _occupied
-	scenery.lattice_origin = _neighbourhood_origin()
-	scenery.lattice_pitch = _house_pitch()
-	scenery.street_every = STREET_EVERY
-	scenery.street_ok = _is_street_ok
 	scenery.view_distance = view_distance
 	# Things already standing that the scatter must not grow through: hand-placed props
 	# and the hand-placed trees.
 	for node_name in ["Props", "Trees"]:
-		var holder := get_node_or_null(node_name)
+		var holder := _town.get_node_or_null(node_name)
 		if holder != null:
 			for child in holder.get_children():
 				if child is Node3D:

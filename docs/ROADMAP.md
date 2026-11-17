@@ -58,6 +58,7 @@ Goal: the push-your-luck loop works with packing alone. Decide here whether the 
 - [x] Main menu: Continue / New Game (asks before overwriting) / Settings (volume, fullscreen, sensitivity) / Exit, with autosave
 - [x] One save slot + backup, position/hotbar saved (warehouse saves as clocked out); hills and mountains beyond the town border
 - [x] Sidewalks along all streets, and bushes/trees/grass spread over the town (your tree2, bush1, grass, sidewalk models)
+- [x] The town is ONE scene with the world: ground, roads (`TownRoad`), railway, lakes, buildings, props and trees are nodes you move in the editor; the generator only makes the lake beds, sidewalks and vegetation; houses and apartment blocks are nodes too. Lakes have depth (bowl-shaped bed, water shader); the club lights only burn while it is open
 - [x] 15 product models (bars, whey, chickpea powder, pills) as new items; 6 placeholder items retired (candy, chips, juice, pasta, rice, beans)
 - [x] Push loose items by walking into them (stand/jump on them); caught scene: camera pans to the supervisor, reason, fade, ban quest entry
 - [x] Quest log (HUD top right + phone Quests app), ban as a quest; screen messages moved above the hotbar
@@ -72,6 +73,7 @@ Goal: the push-your-luck loop works with packing alone. Decide here whether the 
 - [x] Neighbourhood streets run on to the map edge / industrial road; thrown items no longer tunnel through walls
 - [x] Bills sorted in walking order X -> Y -> Z; pay $7 per order, multiplier +0.05; Y corridors lettered from the east (A) and 7 corridors so the extra stock room is reachable
 - [x] Carrying a box locks the hotbar; left click puts the box down; B attaches the bill; belt needs a bill; energy: idle ~free, sprint costs ~1.6x per metre
+- [x] Bigger warehouse: 2.6 m aisles, 43 x 42 m floor + 22 m stock wing; all text is paper (PaperLabel), nothing floats or turns to face you
 - [x] Weekday clock (Mon-Sun, no day counter) + Stats app (days passed and more) + Places app (venues and opening hours)
 - [x] Apartment blocks in the neighbourhood (decor), gambling back room (weekdays) and underground night club (Fri-Sun nights)
 - [x] Warehouse loads/unloads in slices (walls first, shelves fill in ~1 s, no frame over ~15 ms in the test)

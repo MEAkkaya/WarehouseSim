@@ -10,7 +10,7 @@ const G := TownLayout.GROUND_TOP
 ## Rectangles (x, z) of the paved areas.
 const PLAZA := Rect2(-3.5, 10.0, 13.5, 18.0)
 const PARKING := Rect2(-15.0, 10.0, 11.5, 18.0)
-const YARD := Rect2(11.0, 10.0, 32.0, 14.0)
+const YARD := Rect2(11.0, 10.0, 43.0, 14.0)
 
 const CAR_COLORS: Array[Color] = [Color(0.8, 0.15, 0.15), Color(0.2, 0.35, 0.75), Color(0.9, 0.85, 0.3), Color(0.25, 0.25, 0.28), Color(0.85, 0.85, 0.88)]
 

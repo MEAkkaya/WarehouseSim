@@ -28,8 +28,6 @@ var _riders: Array[Box] = []
 var _along: Array[float] = []
 var _lengths: Array[float] = []
 var _total: float = 0.0
-var _result_label: Label3D = null
-var _result_left: float = 0.0
 ## The box waiting at the end of the belt for the robot (nothing moves past it).
 var _waiting_at_end: Box = null
 
@@ -94,15 +92,6 @@ func _build() -> void:
 		shape.shape = box
 		shape.transform = Transform3D(holder.basis, Vector3(centre.x, belt_top / 2.0, centre.z))
 		add_child(shape)
-	_result_label = Label3D.new()
-	_result_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_result_label.pixel_size = 0.0035
-	_result_label.font_size = 40
-	_result_label.outline_size = 12
-	_result_label.modulate = Color(0.6, 1.0, 0.6)
-	_result_label.position = path[path.size() - 1] + Vector3(0.0, 3.2, 0.0)
-	_result_label.visible = false
-	add_child(_result_label)
 
 
 ## The point of the belt (world) at `distance` metres from its start, and the direction there.
@@ -226,9 +215,6 @@ func _process(delta: float) -> void:
 		_along.remove_at(0)
 		_check(_waiting_at_end)
 		box_arrived.emit(_waiting_at_end)
-	if _result_left > 0.0:
-		_result_left -= delta
-		_result_label.visible = _result_left > 0.0
 
 
 ## The robot has taken the box away from the end of the belt.
@@ -255,10 +241,6 @@ func _check(box: Box) -> void:
 		order.completed = true
 		GameState.order_shipped(order, false)
 		text = "Order #%d: WRONG contents  (multiplier reset)" % order.number
-	_result_label.text = text
-	_result_label.modulate = Color(0.6, 1.0, 0.6) if text.contains("CORRECT") else Color(1.0, 0.55, 0.5)
-	_result_label.visible = true
-	_result_left = 6.0
 	var good := text.contains("CORRECT")
 	var title := "Order #%d" % order.number if order != null else "No bill"
 	var detail := "Correct - multiplier x%.2f" % GameState.multiplier if good else ("Wrong - multiplier reset" if order != null else "Box without a bill")

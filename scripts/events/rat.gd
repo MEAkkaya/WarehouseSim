@@ -35,14 +35,6 @@ func _ready() -> void:
 	tail.mesh = tail_mesh
 	tail.position = Vector3(0, 0.25, 0.8)
 	add_child(tail)
-	var label := Label3D.new()
-	label.text = "GIANT RAT"
-	label.pixel_size = 0.004
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position.y = 1.0
-	label.font_size = 36
-	label.outline_size = 8
-	add_child(label)
 	_pick_wander_target()
 
 

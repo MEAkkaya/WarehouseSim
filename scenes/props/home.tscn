@@ -1,6 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/props/home_bed.gd" id="1_bed"]
+[ext_resource type="Script" path="res://scripts/world/paper_label.gd" id="paperlbl"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_home"]
 albedo_color = Color(0.85, 0.8, 0.7, 1)
@@ -80,9 +81,10 @@ light_energy = 1.6
 omni_range = 9.0
 
 [node name="Sign" type="Label3D" parent="."]
+script = ExtResource("paperlbl")
+two_sided = true
+post_to_y = 0.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, 3)
 pixel_size = 0.012
-billboard = 2
 text = "HOME"
 font_size = 64
-outline_size = 12

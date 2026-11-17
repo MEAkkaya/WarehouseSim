@@ -17,19 +17,20 @@ Two apartment blocks stand on the neighbourhood's south street at (42, 130) and 
 shady **Back Room** (top floor, Mon-Fri) and the one with the **Underground Club** (back door in the yard on its
 north side, Fri-Sun nights). Both are marked on the phone map; opening hours are in the Places app.
 
-## Warehouse layout (since the new sketch)
+## Warehouse layout (the big version)
 ```
- z=-23.4  +----------------- Y room -----------------+   +-----------+
-          |  (2nd floor over its ends, open middle)   |===|           |
- z=-14    +--------+--------+---------+--------+------+   | EXTRA     |
-          | OFFICE |  Z room | utility |  X room |      |   | STOCK     |
- z=4      +--+-----+---+----+-+-------+--+------+--+--+   +-----------+
-          |  HALL  |door|      CORRIDOR (belt, desk, boxes) |
- z=10     +--[door]-+----+--[belt hole]------------------+
-          x=-10    x=10   x=15                          x=50
+ z=-31.7  +---------------------- Y room (8 corridors, YA at the east) ----------------+   +-----------+
+          |  2nd floor over both ends, open in the middle                             |===| EXTRA     |
+ z=-20.9  +-----------+---------+------------------+-------+------------------------+   | STOCK     |
+          |  Z room   | utility |      X room (XA at the south door)                 |   |           |
+ z=2      +--[door]---+---------+--------------------[door]------------------------+   +-----------+
+          | HALL |      CORRIDOR (belt, desk, boxes)                                  |
+ z=10     +--[door]-+----+--[belt hole]----------------------------------------------+
+          x=10  (hall + office are west of x=10)                                     x=53.5   (stock x 59.5..75.5)
 ```
+Aisles between the shelf rows are 2.6 m wide (`StorageRegion.aisle_width`), the rooms have 2-3 m of free floor around the shelves.
 Outside: plaza + parking (west), loading yard (belt end, robot, pallet, trucks) south of the corridor.
-The old layout is kept for reference in docs/old_layout/.
+Older layouts are kept for reference in docs/old_layout/.
 
 ## Storeroom regions (built: `scripts/world/storage_region.gd`)
 Regions X, Y and Z are blocks of parallel corridors made of free-standing boltless
@@ -78,25 +79,29 @@ backwards is possible; real one-way doors/turnstiles come later.)
   shell (outer walls + door) and the `WarehouseSite` entrance logic.
 - `scenes/levels/warehouse.tscn` - the INTERIOR only: floor, work area, storeroom
   regions, inner walls. Created when you walk in, deleted when you walk out.
-- `scenes/levels/town.tscn` - blockout town.
+- The town is part of `world.tscn` (node `Town`); see "Town" below.
 
 ## Town (built: blockout from an aerial reference photo)
 Reference: [map_reference_photo.webp](map_reference_photo.webp). The town is generated
-at start-up by `scripts/world/town_builder.gd` from the data in
-`scripts/world/town_layout.gd` (roads, railway, lakes, fields, zones - edit the numbers
-to reshape it). Map coordinates are metres, x east, z south, origin = warehouse centre.
+as ordinary nodes in `world.tscn` under `Town` (ground, roads, railway, lakes, fields,
+buildings, props, trees: move them in the editor). Only the neighbourhood's houses, the
+sidewalks and the vegetation are generated at start-up by `scripts/world/town_builder.gd`,
+which first reads those nodes so nothing lands on them (see docs/SYSTEMS.md "Town").
+Map coordinates are metres, x east, z south, origin = warehouse centre.
 
 - **Industrial terrain** (north-west, around the warehouse): paved estate with ring
-  roads and ~15 large grey boxes; truck yard east of the warehouse.
-- **Neighbourhood** (south-west): ~90 houses with pitched roofs on a street grid, a
+  roads (the bigger warehouse leaves no room for the random factory boxes of the first
+  version: place `Buildings/Industrial` boxes by hand); truck yard east of the warehouse.
+- **Neighbourhood** (south-west): 74 houses with pitched roofs, 7 apartment blocks (all placed nodes under
+  `Town/Buildings/Houses`, `House01`..`Apartment07`) on a street grid, a
   shopping street with 6 shops on the entrance street.
 - **Railway and main road** curve between industry and neighbourhood; the station
   (under construction, with a train car) sits on the rail beside the neighbourhood.
 - **Lakes** (south-east): three lakes, one with a sand beach, ringed with trees and
-  fenced with invisible shore barriers. **Farmland** with farm buildings and hedgerows
+  fenced with invisible shore barriers; each lake is a real basin (bank, bed, water 0.7 m below the ground). **Farmland** with farm buildings and hedgerows
   to the east. Woods between neighbourhood and lakes.
 - **Trees**: 238 instances of `scenes/props/tree.tscn` (your tree1.glb + a trunk collider)
-  placed by hand in `scenes/levels/trees.tscn` with random rotations: rings around the
+  placed by hand under `Town/Trees` in `world.tscn` with random rotations: rings around the
   lakes, woods and hedgerows along the fields. Move/delete/add them in the editor.
 - **World border**: invisible walls around x -60..360, z -95..300, a huge ground slab
   beyond it, and distance fog (colour follows the sky) so the edge is never seen.

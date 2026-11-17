@@ -65,16 +65,18 @@ static func body_box(body: StaticBody3D, size: Vector3, color: Color, emissive: 
 	body.add_child(mesh_instance)
 
 
+## Text on a sheet of paper (see PaperLabel). `free_standing` = a sign you can walk around and
+## that is held by a post from the floor (printed on both sides); otherwise it is stuck on a wall.
 static func label(parent: Node3D, text: String, at: Vector3, pixel_size: float = 0.012,
-		color: Color = Color.WHITE, billboard: bool = false) -> Label3D:
-	var l := Label3D.new()
+		color: Color = Color.WHITE, free_standing: bool = false) -> Label3D:
+	var l := PaperLabel.new()
 	l.text = text
 	l.pixel_size = pixel_size
 	l.font_size = 56
-	l.outline_size = 12
 	l.modulate = color
-	if billboard:
-		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	if free_standing:
+		l.two_sided = true
+		l.post_to_y = 0.0
 	l.position = at
 	parent.add_child(l)
 	return l

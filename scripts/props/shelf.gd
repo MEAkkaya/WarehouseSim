@@ -42,7 +42,7 @@ var _items: Array[WorldItem] = []
 # Shared by every shelf: the lattice material is fixed up once (see _fix_lattice_material).
 static var _lattice_fixed: bool = false
 
-@onready var _label: Label3D = $Label
+@onready var _label: PaperLabel = $Label
 
 
 ## How many items lie on the shelf right now.
@@ -183,6 +183,6 @@ func _fix_lattice_material() -> void:
 
 func _refresh_label() -> void:
 	if item != null:
-		_label.text = "%s - %s" % [shelf_id, item.display_name]
+		_label.set_paper_text("%s - %s" % [shelf_id, item.display_name])
 	else:
-		_label.text = shelf_id
+		_label.set_paper_text(shelf_id)

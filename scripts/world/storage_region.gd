@@ -44,8 +44,9 @@ extends Node3D
 ## by at most one layer per column, to 4), new every visit: (corridor, side) pairs
 ## where side 0 = left row and 1 = right row. They lead up to the second floor.
 @export var staircase_rows: Array[Vector2i] = []
-## Free walking width between the two shelf rows of a corridor, in metres.
-@export var aisle_width: float = 1.6
+## Free walking width between the two shelf rows of a corridor, in metres (wide enough to pass
+## each other with a box).
+@export var aisle_width: float = 2.6
 @export var shelf_scene: PackedScene = preload("res://scenes/props/shelf.tscn")
 
 ## Every shelf of this region by ID ("XC 04 03"), for assigning items later.
@@ -87,9 +88,7 @@ func _ready() -> void:
 	_plan_heights()
 	for corridor in corridor_count:
 		_build_corridor(corridor)
-	var sign_label := _make_label("SHELVES %s" % region_letter, 0.012, 72)
-	sign_label.position = Vector3(region_width / 2.0, stack_top + 1.2, 0.0)
-	add_child(sign_label)
+	_add_sign("SHELVES %s" % region_letter, 0.012, 72, Vector3(region_width / 2.0, stack_top + 1.2, 0.0))
 	_queue_task(_mark_built)
 
 
@@ -149,9 +148,7 @@ func _plan_heights() -> void:
 
 func _build_corridor(corridor: int) -> void:
 	# Sign over the entrance: "XC".
-	var sign_label := _make_label("%s%s" % [region_letter, corridor_letter(corridor)], 0.008, 64)
-	sign_label.position = Vector3(corridor * pitch + pitch / 2.0, stack_top + 0.4, 0.3)
-	add_child(sign_label)
+	_add_sign("%s%s" % [region_letter, corridor_letter(corridor)], 0.008, 64, Vector3(corridor * pitch + pitch / 2.0, stack_top + 0.4, 0.3))
 
 	# The left row's back is at the corridor's left edge, the right row's back at
 	# its right edge; shelf origins are at their centres.
@@ -181,11 +178,13 @@ func _add_shelf(id: String, at: Vector3, yaw_degrees: float) -> void:
 	shelves[id] = shelf
 
 
-func _make_label(text: String, pixel_size: float, font_size: int) -> Label3D:
-	var label := Label3D.new()
+## A sign made of paper, hung from the ceiling by two strings (printed on both sides).
+func _add_sign(text: String, pixel_size: float, font_size: int, at: Vector3) -> void:
+	var label := PaperLabel.new()
 	label.text = text
 	label.pixel_size = pixel_size
 	label.font_size = font_size
-	label.outline_size = 12
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	return label
+	label.two_sided = true
+	label.position = at
+	label.hang_length = maxf(0.0, WarehouseLayout.CEILING - to_global(at).y - 0.35)
+	add_child(label)

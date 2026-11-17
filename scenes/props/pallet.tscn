@@ -20,7 +20,6 @@ transform = Transform3D(0.27, 0, 0, 0, 0.27, 0, 0, 0, 0.27, 0, 0.1744, 0)
 [node name="TimerLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0)
 pixel_size = 0.0025
-billboard = 2
 text = "Shipping in 10 s"
 font_size = 48
 outline_size = 12
@@ -28,7 +27,6 @@ outline_size = 12
 [node name="ResultLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0)
 pixel_size = 0.0025
-billboard = 2
 modulate = Color(0.6, 1, 0.6, 1)
 text = ""
 font_size = 40

@@ -6,8 +6,8 @@ extends StaticBody3D
 
 @export var label_text: String = "RESTOCK PALLET"
 
-@onready var _label: Label3D = $Label
+@onready var _label: PaperLabel = $Label
 
 
 func _ready() -> void:
-	_label.text = label_text
+	_label.set_paper_text(label_text)

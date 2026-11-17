@@ -9,7 +9,7 @@ extends Node3D
 ##     moment, he reports it: you are caught.
 ##   - When the heat is high (big multiplier) and he sees you, he walks up and gives
 ##     you a lecture that freezes you for a few seconds.
-## The visible model is a placeholder capsule; swap in a character later.
+## The visible model is the shared employee model (CharacterModel).
 
 enum State { PATROL, APPROACH, LECTURE }
 

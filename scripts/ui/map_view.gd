@@ -73,8 +73,8 @@ func _draw() -> void:
 	draw_polyline(_polyline_to_map(TownLayout.RAIL), Color(0.12, 0.12, 0.14), 2.2, true)
 	draw_polyline(_polyline_to_map(TownLayout.RAIL), Color(0.9, 0.9, 0.9), 0.8, true)
 	# Places
-	draw_rect(_rect_to_map(Rect2(-10, -21, 60, 31)), Color(0.15, 0.3, 0.75))
-	draw_rect(_rect_to_map(Rect2(46, -19, 20, 23)), Color(0.15, 0.3, 0.75))
+	draw_rect(_rect_to_map(Rect2(-10, -31.7, 63.5, 41.7)), Color(0.15, 0.3, 0.75))
+	draw_rect(_rect_to_map(Rect2(53.5, -29, 22, 29)), Color(0.15, 0.3, 0.75))
 	draw_circle(_to_map(Vector2(0, 12)), 3.0, Color(1.0, 0.85, 0.2))
 	_label("Warehouse", Vector2(0, -34))
 	# The two shady venues (opening hours: see the Places app).
@@ -82,8 +82,7 @@ func _draw() -> void:
 	draw_circle(_to_map(TownLayout.CLUB_SPOT), 2.6, Color(1.0, 0.3, 0.9))
 	_label("Industrial", Vector2(30, -80))
 	_label("Neighbourhood", Vector2(36, 150))
-	var rail := TownLayout.RAIL
-	_label("Station", (rail[5] + rail[6]) / 2.0 + Vector2(-12, -6))
+	_label("Station", TownLayout.STATION_SPOT + Vector2(-12, -6))
 	_label("Lakes", Vector2(195, 175))
 	_label("Farmland", Vector2(250, 20))
 	# North marker

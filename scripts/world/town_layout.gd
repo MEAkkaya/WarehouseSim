@@ -1,82 +1,50 @@
 class_name TownLayout
 extends RefCounted
-## The DATA of the town layout - roads, railway, lakes, fields, zones. Everything
-## is in metres: x = east, z = south, origin = the middle of the warehouse. Change
-## numbers here to reshape the map; TownBuilder turns them into geometry.
-##
-## The layout follows an aerial photo: an industrial terrain in the north-west
-## (with our warehouse), a dense neighbourhood below it, a railway and a main road
-## curving between them, three lakes in the south-east and farmland to the east.
+## The town's layout as DATA the game's scripts read (sidewalk placing, house placing, the
+## map). Since the world is ONE scene (scenes/levels/world.tscn), the roads, the railway,
+## the lakes, the fields, the ground and the buildings are ordinary nodes under `Town` that
+## you move in the editor; `scan()` reads them into the lists below when the game starts.
+## What is still a number here: the playable area, and the two zones the generator fills
+## (neighbourhood, woods). Everything is in metres: x = east, z = south, origin = the
+## middle of the warehouse.
 
 ## Top surface of the ground.
 const GROUND_TOP := 0.09
 ## The playable area. Invisible walls close it; fog hides what lies beyond.
 const BOUNDS := Rect2(-60, -95, 420, 395)
 
-## Roads as polylines (x, z points) with a width in metres.
-static var ROADS: Array[Dictionary] = [
-	{"name": "Entrance street", "width": 7.0,
-		"points": PackedVector2Array([Vector2(0, 14), Vector2(0, 40), Vector2(0, 130), Vector2(0, 207)])},
-	{"name": "Industrial road", "width": 8.0,
-		"points": PackedVector2Array([Vector2(-55, 40), Vector2(0, 40), Vector2(70, 40), Vector2(160, 40)])},
-	{"name": "Main road", "width": 10.0,
-		"points": PackedVector2Array([Vector2(185, -95), Vector2(165, 22), Vector2(134, 112),
-				Vector2(118, 166), Vector2(56, 240), Vector2(-9, 277), Vector2(-60, 298)])},
-	{"name": "Industrial ring west", "width": 7.0,
-		"points": PackedVector2Array([Vector2(-50, -90), Vector2(-50, 40)])},
-	{"name": "Industrial ring east", "width": 7.0,
-		"points": PackedVector2Array([Vector2(72, -90), Vector2(72, 40)])},
-	{"name": "Industrial north", "width": 7.0,
-		"points": PackedVector2Array([Vector2(-50, -50), Vector2(72, -50)])},
-	{"name": "Lake road", "width": 5.0,
-		"points": PackedVector2Array([Vector2(134, 112), Vector2(165, 122), Vector2(190, 128)])},
-]
-
-## The railway (a polyline). The station sits on the segment between points 5 and 6.
-static var RAIL: PackedVector2Array = PackedVector2Array([
-	Vector2(-60, -100), Vector2(-40, -86), Vector2(32, -58), Vector2(90, -9), Vector2(144, 45),
-	Vector2(126, 90), Vector2(117, 126), Vector2(77, 203), Vector2(-9, 275), Vector2(-60, 298)])
-const RAIL_HALF_WIDTH := 3.0
-
-## Lakes: ellipses. `beach` adds a sand shore.
-const LAKES: Array[Dictionary] = [
-	{"name": "Beach lake", "center": Vector2(191, 132), "radius": Vector2(36, 26), "beach": true},
-	{"name": "West lake", "center": Vector2(157, 205), "radius": Vector2(50, 40), "beach": false},
-	{"name": "South lake", "center": Vector2(236, 232), "radius": Vector2(47, 54), "beach": false},
-]
-
-## Farmland patches (flat coloured rectangles).
-const FIELDS: Array[Dictionary] = [
-	{"rect": Rect2(200, -30, 100, 70), "color": Color(0.33, 0.55, 0.25)},
-	{"rect": Rect2(200, 45, 90, 45), "color": Color(0.42, 0.6, 0.28)},
-	{"rect": Rect2(300, -30, 55, 120), "color": Color(0.3, 0.5, 0.24)},
-	{"rect": Rect2(295, 100, 60, 80), "color": Color(0.5, 0.58, 0.3)},
-	{"rect": Rect2(200, -92, 150, 55), "color": Color(0.38, 0.57, 0.27)},
-	{"rect": Rect2(-58, 218, 52, 70), "color": Color(0.36, 0.54, 0.26)},
-]
-
-## Zones the builders fill.
-const INDUSTRIAL := Rect2(-58, -92, 135, 150)
+## The zone the generator fills with houses and apartment blocks (on a lattice, skipping
+## everything that is in the way: roads, lakes, your buildings).
 const NEIGHBOURHOOD := Rect2(-32, 88, 135, 125)
 ## Woods (random trees): between the neighbourhood and the lakes and north of them.
 const WOODS: Array[Rect2] = [Rect2(104, 118, 40, 110), Rect2(150, 70, 70, 36), Rect2(100, 230, 60, 55)]
 
 ## The two special apartment buildings (centre of the footprint, front faces south).
 ## The club's back door is on its north side, in a yard where no house stands.
-const GAMBLING_SPOT := Vector2(42, 130)
-const CLUB_SPOT := Vector2(60, 130)
+## (Read from the nodes Town/Buildings/GamblingApartment and ClubApartment.)
+static var GAMBLING_SPOT := Vector2(42, 130)
+static var CLUB_SPOT := Vector2(60, 130)
+## Where the train waits (the node Town/Buildings/Station).
+static var STATION_SPOT := Vector2(121.5, 108)
 
-
-## Holes in the town's ground slab (x, z): the stair shaft down to the night club.
-static func ground_holes() -> Array[Rect2]:
-	return [Rect2(CLUB_SPOT.x + 2.5, CLUB_SPOT.y - 2.6, 1.7, 5.8)]
-
+## ---- Filled by scan() from the nodes of the scene ----------------------------------
+## Roads: {name, width, points (PackedVector2Array)} (TownRoad nodes of kind ROAD).
+static var ROADS: Array[Dictionary] = []
+## The railway line (the TownRoad of kind RAIL).
+static var RAIL: PackedVector2Array = PackedVector2Array()
+const RAIL_HALF_WIDTH := 3.0
+## Lakes (TownLake nodes): {name, center, radius, beach}.
+static var LAKES: Array[Dictionary] = []
+## Farmland patches (the boxes under Town/Fields): {rect, color}.
+static var FIELDS: Array[Dictionary] = []
+## The paved industrial area (the node Town/IndustrialPaving).
+static var INDUSTRIAL := Rect2(-58, -92, 135, 150)
 
 ## Places nothing else may be built on: the warehouse building with its apron, the
 ## truck yard, the station, the shopping street.
 const KEEP_OUT: Array[Rect2] = [
-	Rect2(-30, -30, 100, 66),   # the warehouse complex, its plaza, parking and loading yard
-	Rect2(70, -30, 6, 50),      # a buffer east of the extra stock room
+	Rect2(-30, -40, 112, 76),   # the warehouse complex, its plaza, parking and loading yard
+	Rect2(76, -40, 6, 60),      # a buffer east of the extra stock room
 	Rect2(86, 86, 44, 44),
 	Rect2(-17, 88, 34, 46),
 	Rect2(18, 90, 16, 14),
@@ -86,13 +54,80 @@ const KEEP_OUT: Array[Rect2] = [
 static var _road_samples: Array = []
 
 
+## Reads the roads, rail, lakes, fields... from the nodes under `town` (the `Town` node of
+## world.tscn). Call it once at game start, before anything is built.
+static func scan(town: Node) -> void:
+	_road_samples.clear()
+	ROADS.clear()
+	RAIL = PackedVector2Array()
+	LAKES.clear()
+	FIELDS.clear()
+	var roads := town.get_node_or_null("Roads")
+	if roads != null:
+		for node in roads.get_children():
+			var road := node as TownRoad
+			if road == null:
+				continue
+			var line := road.get_line()
+			if line.size() < 2:
+				continue
+			if road.kind == TownRoad.Kind.RAIL:
+				if RAIL.is_empty():
+					RAIL = line
+			else:
+				ROADS.append({"name": String(road.name), "width": road.width, "points": line})
+	var lakes := town.get_node_or_null("Lakes")
+	if lakes != null:
+		for node in lakes.get_children():
+			var lake := node as TownLake
+			if lake != null:
+				LAKES.append({"name": String(lake.name), "center": lake.get_center(),
+						"radius": lake.get_radius(), "beach": lake.beach})
+	var fields := town.get_node_or_null("Fields")
+	if fields != null:
+		for node in fields.get_children():
+			var field := node as MeshInstance3D
+			if field != null and field.mesh != null:
+				var color := Color(0.4, 0.55, 0.3)
+				if field.mesh.material is StandardMaterial3D:
+					color = (field.mesh.material as StandardMaterial3D).albedo_color
+				FIELDS.append({"rect": footprint(field), "color": color})
+	var paving := town.get_node_or_null("IndustrialPaving") as MeshInstance3D
+	if paving != null and paving.mesh != null:
+		INDUSTRIAL = footprint(paving)
+	var gambling := town.get_node_or_null("Buildings/GamblingApartment") as Node3D
+	if gambling != null:
+		GAMBLING_SPOT = Vector2(gambling.global_position.x, gambling.global_position.z)
+	var club := town.get_node_or_null("Buildings/ClubApartment") as Node3D
+	if club != null:
+		CLUB_SPOT = Vector2(club.global_position.x, club.global_position.z)
+	var station := town.get_node_or_null("Buildings/Station") as Node3D
+	if station != null:
+		STATION_SPOT = Vector2(station.global_position.x, station.global_position.z)
+
+
+## The ground rectangle (x, z) a mesh node covers (axis-aligned, rotation included).
+static func footprint(node: MeshInstance3D) -> Rect2:
+	var box := node.global_transform * node.get_aabb()
+	return Rect2(box.position.x, box.position.z, box.size.x, box.size.z)
+
+
+## Holes in the town's ground slab (x, z): the stair shaft down to the night club.
+static func ground_holes() -> Array[Rect2]:
+	return [Rect2(CLUB_SPOT.x + 2.5, CLUB_SPOT.y - 2.6, 1.7, 5.8)]
+
+
 ## Shortest distance from `p` to a polyline.
 static func distance_to_polyline(p: Vector2, points: PackedVector2Array) -> float:
 	var best := INF
 	for i in points.size() - 1:
 		var a := points[i]
 		var ab := points[i + 1] - a
-		var t := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var length_squared := ab.length_squared()
+		if length_squared < 0.000001:
+			best = minf(best, p.distance_to(a))
+			continue
+		var t := clampf((p - a).dot(ab) / length_squared, 0.0, 1.0)
 		best = minf(best, p.distance_to(a + ab * t))
 	return best
 

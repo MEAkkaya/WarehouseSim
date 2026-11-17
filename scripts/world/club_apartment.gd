@@ -20,6 +20,12 @@ const ROOM_Z0 := 3.2
 const ROOM_Z1 := 16.0
 
 var _disco_lights: Array[OmniLight3D] = []
+## Every light of the club (stairs, door, club room): on only while the club is open.
+var _club_lights: Array[OmniLight3D] = []
+var _dance_floor: DanceFloor = null
+var _hours: OpeningHours = null
+var _lit: bool = true
+var _check_left: float = 0.0
 var _time: float = 0.0
 
 
@@ -54,14 +60,17 @@ func _build() -> void:
 	door.inside_direction = Vector3(0, 0, 1)
 	door.position = Vector3(3.3, 0.0, -DEPTH / 2.0 + WALL / 2.0)
 	add_child(door)
-	ApartmentKit.light(self, Vector3(3.3, 3.0, -DEPTH / 2.0 - 0.6), Color(1.0, 0.2, 0.6), 1.6, 6.0)
+	_club_lights.append(ApartmentKit.light(self, Vector3(3.3, 3.0, -DEPTH / 2.0 - 0.6), Color(1.0, 0.2, 0.6), 1.6, 6.0))
 	# Bins and a crate in the yard behind the building.
 	ApartmentKit.box(self, Vector3(0.5, 0.6, -5.6), Vector3(1.6, 1.2, 0.9), Color(0.2, 0.35, 0.25))
 	ApartmentKit.box(self, Vector3(-1.6, 0.4, -6.2), Vector3(1.0, 0.8, 1.0), Color(0.45, 0.35, 0.2))
 	# --- the stairs down
 	ApartmentKit.stairs(self, Vector3(3.35, 0.0, -2.6), Vector3(3.35, CLUB_FLOOR, 3.2), 1.7, Color(0.3, 0.3, 0.34))
-	ApartmentKit.light(self, Vector3(3.35, -1.0, 0.0), Color(0.9, 0.2, 0.8), 1.2, 6.0)
+	_club_lights.append(ApartmentKit.light(self, Vector3(3.35, -1.0, 0.0), Color(0.9, 0.2, 0.8), 1.2, 6.0))
 	_build_club()
+	# The lights follow the opening hours (they start off, `_process` switches them on).
+	_hours = OpeningHours.make(OPEN_DAYS, OPEN_FROM, OPEN_TO)
+	_set_lit(false)
 
 
 ## The club: floor, ceiling, walls, a bar, a DJ booth and the dance floor.
@@ -86,6 +95,7 @@ func _build_club() -> void:
 	var dance := DanceFloor.new()
 	dance.position = Vector3(-2.0, CLUB_FLOOR - 0.1, 9.5)
 	add_child(dance)
+	_dance_floor = dance
 	# The bar along the west wall.
 	var bar := PurchaseCounter.new()
 	bar.title = "BAR"
@@ -106,10 +116,26 @@ func _build_club() -> void:
 	# Disco lights.
 	for k in 3:
 		_disco_lights.append(ApartmentKit.light(self, Vector3(-6.0 + k * 4.0, top - 0.8, 9.5), Color.WHITE, 2.0, 8.0))
-	ApartmentKit.light(self, Vector3(0.0, mid_y, 5.0), Color(0.5, 0.4, 0.9), 0.8, 8.0)
+	_club_lights.append_array(_disco_lights)
+	_club_lights.append(ApartmentKit.light(self, Vector3(0.0, mid_y, 5.0), Color(0.5, 0.4, 0.9), 0.8, 8.0))
+
+
+## Lights (and the dance floor's glowing tiles) on or off.
+func _set_lit(lit: bool) -> void:
+	_lit = lit
+	for light in _club_lights:
+		light.visible = lit
+	if _dance_floor != null:
+		_dance_floor.lit = lit
 
 
 func _process(delta: float) -> void:
 	_time += delta
+	_check_left -= delta
+	if _check_left <= 0.0:
+		_check_left = 0.5
+		var open := _hours.is_open_now()
+		if open != _lit:
+			_set_lit(open)
 	for k in _disco_lights.size():
 		_disco_lights[k].light_color = Color.from_hsv(fposmod(_time * 0.2 + k * 0.33, 1.0), 0.9, 1.0)

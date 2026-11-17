@@ -9,6 +9,9 @@ extends Interactable
 @export_range(0.0, 1.0) var dance_off_chance: float = 0.15
 @export var dance_off_prize: int = 150
 
+## Glowing tiles on or off (the club switches them off while it is closed).
+var lit: bool = true
+
 var _tiles: Array[MeshInstance3D] = []
 var _time: float = 0.0
 
@@ -40,6 +43,10 @@ func _process(delta: float) -> void:
 	_time += delta
 	for k in _tiles.size():
 		var material := _tiles[k].material_override as StandardMaterial3D
+		if not lit:
+			material.albedo_color = Color(0.12, 0.11, 0.15)
+			material.emission_enabled = false
+			continue
 		var color := Color.from_hsv(fposmod(_time * 0.25 + k * 0.07, 1.0), 0.8, 1.0)
 		material.albedo_color = color
 		material.emission_enabled = true

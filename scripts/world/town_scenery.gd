@@ -50,14 +50,10 @@ const BORDER_TREE_SPACING := 7.0
 var random_seed: int = 21
 var occupied: Array[Rect2] = []              ## rectangles of the buildings already standing
 var blockers: Array[Vector2] = []            ## points with something on them (props, hand-placed trees)
-var lattice_origin: Vector2 = Vector2.ZERO   ## the neighbourhood's own streets
-var lattice_pitch: Vector2 = Vector2(9, 8)
-var street_every: int = 6
-var street_ok: Callable                      ## TownBuilder._is_street_ok(Vector2) -> bool
 var view_distance: float = 330.0
 
 var _rng := RandomNumberGenerator.new()
-var _streets: Array[Dictionary] = []         ## {points, half, lattice}
+var _streets: Array[Dictionary] = []         ## {points, half}
 var _blocked := PackedByteArray()
 var _taken := PackedByteArray()
 var _cols: int = 0
@@ -86,20 +82,10 @@ func build() -> void:
 
 # ---- The streets -----------------------------------------------------------------------
 
+## Every road of the scene (TownRoad nodes) gets sidewalks along both sides.
 func _collect_streets() -> void:
 	for road in TownLayout.ROADS:
-		_streets.append({"points": road.points, "half": road.width / 2.0, "lattice": false})
-	# The neighbourhood's own streets: straight lines at every `street_every`-th lattice line.
-	# (They run to the edge of the map; `street_ok` says where there really is a street.)
-	var bounds := TownLayout.BOUNDS
-	for i in range(0, 16, street_every):
-		var x := lattice_origin.x + i * lattice_pitch.x
-		_streets.append({"points": PackedVector2Array([Vector2(x, bounds.position.y), Vector2(x, bounds.end.y)]),
-				"half": 2.6, "lattice": true})
-	for j in range(0, 16, street_every):
-		var z := lattice_origin.y + j * lattice_pitch.y
-		_streets.append({"points": PackedVector2Array([Vector2(bounds.position.x, z), Vector2(bounds.end.x, z)]),
-				"half": 2.6, "lattice": true})
+		_streets.append({"points": road.points, "half": road.width / 2.0})
 
 
 # ---- Sidewalks -------------------------------------------------------------------------
@@ -179,8 +165,6 @@ func _curb_state(p: Vector2, centre: Vector2, street: Dictionary) -> CurbState:
 	for index in [0, 1, 2]:
 		if TownLayout.KEEP_OUT[index].has_point(p):
 			return CurbState.BLOCKED
-	if street.lattice and not street_ok.call(centre):
-		return CurbState.BLOCKED  # the neighbourhood's street stops here (railway, lake)
 	if TownLayout.distance_to_polyline(p, TownLayout.RAIL) < TownLayout.RAIL_HALF_WIDTH + 1.2:
 		return CurbState.BLOCKED
 	for lake in TownLayout.LAKES:
@@ -266,8 +250,6 @@ func _mark_blocked() -> void:
 			var steps := maxi(1, int(a.distance_to(b) / 1.5))
 			for s in steps + 1:
 				var spot := a.lerp(b, float(s) / steps)
-				if street.lattice and not street_ok.call(spot):
-					continue  # no street here
 				_mark_circle(_blocked, spot, street.half + CURB_WIDTH + 0.9)
 	for rect in occupied:
 		_mark_rect(_blocked, rect.grow(0.8))

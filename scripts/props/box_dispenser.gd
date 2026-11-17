@@ -25,7 +25,7 @@ var max_stock: int = 0
 var _slabs: Array[MeshInstance3D] = []
 var _time_left: float = 0.0
 
-@onready var _stock_label: Label3D = $StockLabel
+@onready var _stock_label: PaperLabel = $StockLabel
 
 
 func _ready() -> void:
@@ -97,6 +97,6 @@ func _refresh() -> void:
 
 func _refresh_label() -> void:
 	if stock >= max_stock:
-		_stock_label.text = "%d / %d" % [stock, max_stock]
+		_stock_label.set_paper_text("%d / %d" % [stock, max_stock])
 	else:
-		_stock_label.text = "%d / %d  - refill in %d s" % [stock, max_stock, ceili(_time_left)]
+		_stock_label.set_paper_text("%d / %d  - refill in %d s" % [stock, max_stock, ceili(_time_left)])

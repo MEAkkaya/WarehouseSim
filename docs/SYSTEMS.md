@@ -52,10 +52,10 @@ get off the bike...) is listed small and half transparent on the left side (`Pla
 ## The warehouse layout and the loading line
 Numbers: `scripts/world/warehouse_layout.gd` (rooms, belt path, supervisor route, work loops, lights). The building
 is roofed (ceiling 6.5 m; the second floor's top is 3.4 m, so you do not hit your head when you jump). From the main
-door (x = 0, z = 10, south): the hall and the office (x -10..10), the warehouse door (x = 10) into the corridor (x 10..50,
-z 4..10: reception, box dispensers, the order desk, the belt), then the Z room (west), a utility block, the X room
+door (x = 0, z = 10, south): the hall and the office (x -10..10), the warehouse door (x = 10) into the corridor (x 10..53.5,
+z 2..10: reception, box dispensers, the order desk, the belt), then the Z room (west), a utility block, the X room
 (east), the Y room (north, 5 columns so the staircase rows climb 5 layers to the second floor) and, through a short
-passage from the Y room, the extra stock room (x 52..66, restocking crates and the blind spots).
+passage from the Y room, the extra stock room (x 59.5..75.5, restocking crates and the blind spots).
 - Persistent walls (outer shell, hall, office, roof) are in scenes/levels/world.tscn under `WarehouseShell`; the walls between
   the rooms are CSG boxes in scenes/levels/warehouse.tscn - move them in the editor. If you do, check `WarehouseLayout`:
   supervisors/workers walk fixed paths and some events use the work-floor rectangles.
@@ -88,7 +88,8 @@ can be climbed without knocking the stock off.
 ## Where things live
 - Interior (created on entry, deleted on exit): scenes/levels/warehouse.tscn. It contains the
   VisitGenerator (random stock) and SupervisorManager.
-- Sidewalks and vegetation: `TownScenery` (scripts/world/town_scenery.gd, created by TownBuilder after the buildings).
+- Sidewalks and vegetation: `TownScenery` (scripts/world/town_scenery.gd, created by TownBuilder after the buildings;
+  sidewalks follow every `TownRoad` of the scene).
   Curb pieces (`sidewalk.glb`) along both sides of every street, left open at crossings. The corner model
   (`sidewalk_corner.glb`) is used ONLY at real corners: where a street bends and where a curb turns the corner into a crossing
   street; straight curb and curb that just stops (railway, lake, border) is the plain model; invisible 34-degree ramps over them so you can walk across. `tree2.glb`, `bush1.glb`,
@@ -101,7 +102,19 @@ can be climbed without knocking the stock off.
 - Scenery beyond the border: `Landscape` (scripts/world/landscape.gd, created by TownBuilder): a few mountain ranges
   (about a third of the directions; open low land elsewhere), no back sides, about 2,000 triangles, no collision. Tune `reach`,
   `max_height`, `ramp_distance`, `cell`, or delete the node for a real model.
-- Town: scenes/levels/town.tscn (+ scripts/world/town_builder.gd, town_layout.gd). Hand-placed props go under `Props`.
+- Town: ONE scene with the rest of the world, `scenes/levels/world.tscn`, node `Town`: `Ground`, `IndustrialPaving`, `Fields`,
+  `Roads` (`TownRoad` = a Path3D with a visible strip; kind ROAD or RAIL), `Lakes` (`TownLake`: scale = the two radii; `beach`
+  flag), `Buildings` (Houses = 74 houses + 7 apartment blocks, one node each; Industrial, Shops, Farms, Station,
+  GamblingApartment, ClubApartment), `Props`, `Trees`. All are plain nodes: select and move them in the editor. The node
+  `TownBuilder` (scripts/world/town_builder.gd) only generates the high count things at game start: the lake beds, the
+  sidewalks and vegetation, the shore fence, the world border, the landscape.
+  Lakes (scripts/world/lake_basin.gd, assets/shaders/lake_water.gdshader): the lake disc in the scene is the handle; at game
+  start the builder cuts a hole in the ground slab, builds a bowl-shaped bed with sloping banks (sand next to the beach
+  lake, 3 m deep in the middle, collider included) and puts the water 0.7 m below the ground with a depth shader: colour and
+  see-through-ness follow the depth (light shallows, dark middle), a foam line at the shore, ripples that fade with distance. It first reads the scene (`TownLayout.scan`, scripts/world/town_layout.gd), so nothing
+  generated lands on a road, lake or building (every MeshInstance3D under `Buildings` and `Props` counts as standing).
+  Nodes in the group `editor_only` are removed when the game starts (the orange boxes marking the two apartment blocks).
+  Still numbers in TownLayout: the playable area, the neighbourhood zone, the woods, KEEP_OUT.
 - Data you can edit in the Inspector without code: data/items, data/events, data/furniture.
 
 ## Tuning numbers (all constants at the top of the scripts)
@@ -140,7 +153,7 @@ New event = a script + a .tres, no other changes.
   - `GamblingApartment` at TownLayout.GAMBLING_SPOT: corner shop (PurchaseCounter) on the ground floor, stairs past
     two floors of locked flats, and on the top floor "The Back Room" (slots, poker, roulette = `GamblingMachine`).
     Its door is a `TimedDoor`, unlocked **Monday-Friday**.
-  - `ClubApartment` at TownLayout.CLUB_SPOT: record shop in front; a plain back door (in a yard where no house stands)
+  - `ClubApartment` at TownLayout.CLUB_SPOT (its lights, the door lamp and the dance floor tiles are on ONLY while it is open): record shop in front; a plain back door (in a yard where no house stands)
     leads down stairs into the **Underground Club** (bar, dance floor with `DanceFloor`, disco lights). The back door
     is unlocked **Friday-Sunday, 20:00-06:00**. The stair shaft is a hole in the town's ground
     (TownLayout.ground_holes(); TownBuilder cuts the ground slab around it); the club has its own ceiling.
@@ -171,3 +184,9 @@ New event = a script + a .tres, no other changes.
   (`Box.get_detail_lines` -> `PlayerHUD.set_carry_lines`).
 - Bike speed is `Player.bike_speed_factor` (3 x walking). Food energy is `energy_restore` in data/items/*.tres (2.5 x the old values).
 - Letters: X and Y are lettered from where you enter (`StorageRegion.reverse_letters`): XA is the corridor next to the entrance. Bills go X, Y, Z, each A upwards.
+
+## Text is paper
+There is no floating text that turns to face you. Every sign, name tag and shelf label is a `PaperLabel` (scripts/world/paper_label.gd):
+a Label3D that grows a real sheet of paper behind its text. Wall signs are stuck on the wall, shelf labels are tags on the shelf edge,
+NPC names are badges on their chests, signs in the middle of a room hang from the ceiling on two strings (the corridor letters of the
+shelf regions) or stand on a post (props, town signs). After changing `text` at run time call `set_paper_text()` so the sheet is refitted.

@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://scripts/events/event_runner.gd" id="20_events"]
 [ext_resource type="Script" path="res://scripts/world/load_queue.gd" id="21_queue"]
 [ext_resource type="Script" path="res://scripts/npc/supervisor_manager.gd" id="19_supervisors"]
+[ext_resource type="Script" path="res://scripts/world/paper_label.gd" id="paperlbl"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.45, 0.45, 0.48, 1)
@@ -29,140 +30,141 @@ albedo_color = Color(0.82, 0.8, 0.74, 1)
 [node name="Warehouse" type="Node3D" unique_id=1489249576]
 
 [node name="FloorMain" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.15, 0, -6.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.75, 0, -10.85)
 use_collision = true
-size = Vector3(40.3, 0.2, 33.7)
+size = Vector3(43.8, 0.2, 42)
 material = SubResource("Mat_floor")
 
 [node name="FloorStock" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 0, -7.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 0, -14.5)
 use_collision = true
-size = Vector3(20, 0.2, 22.8)
+size = Vector3(22.3, 0.2, 29.3)
 material = SubResource("Mat_floor")
 
 [node name="CorridorNorthWall" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 3.25, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 3.25, 2)
 use_collision = true
-size = Vector3(6, 6.5, 0.2)
+size = Vector3(5, 6.5, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="CorridorNorthWallHeader" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 4.55, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.75, 4.55, 2)
 use_collision = true
-size = Vector3(3, 3.9, 0.2)
+size = Vector3(3.5, 3.9, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="CorridorNorthWall2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 3.25, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.25, 3.25, 2)
 use_collision = true
-size = Vector3(22, 6.5, 0.2)
+size = Vector3(25.5, 6.5, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="CorridorNorthWallHeader2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.5, 4.55, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.75, 4.55, 2)
 use_collision = true
-size = Vector3(3, 3.9, 0.2)
+size = Vector3(3.5, 3.9, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="CorridorNorthWall3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 3.25, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.5, 3.25, 2)
 use_collision = true
 size = Vector3(6, 6.5, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="YRoomSouthWall" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 3.25, -14)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.75, 3.25, -20.9)
 use_collision = true
-size = Vector3(1, 6.5, 0.2)
+size = Vector3(3.5, 6.5, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="YRoomSouthWallHeader" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 4.55, -14)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 4.55, -20.9)
 use_collision = true
-size = Vector3(3, 3.9, 0.2)
+size = Vector3(3.5, 3.9, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="YRoomSouthWall2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 3.25, -14)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.25, 3.25, -20.9)
 use_collision = true
-size = Vector3(22, 6.5, 0.2)
+size = Vector3(32.5, 6.5, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="YRoomSouthWallHeader2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.5, 4.55, -14)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51, 4.55, -20.9)
 use_collision = true
 size = Vector3(3, 3.9, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="YRoomSouthWall3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.5, 3.25, -14)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53, 3.25, -20.9)
 use_collision = true
 size = Vector3(1, 6.5, 0.2)
 material = SubResource("Mat_wall")
 
 [node name="UtilityBlock" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 3.25, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.75, 3.25, -9.45)
 use_collision = true
-size = Vector3(6, 6.5, 18)
+size = Vector3(6.5, 6.5, 22.9)
 material = SubResource("Mat_wall")
 
 [node name="SignZArea" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 3.1, 4.15)
+script = ExtResource("paperlbl")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.75, 3.1, 2.15)
 pixel_size = 0.01
 text = "Z AREA"
 font_size = 64
-outline_size = 12
 
 [node name="SignXArea" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.5, 3.1, 4.15)
+script = ExtResource("paperlbl")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.75, 3.1, 2.15)
 pixel_size = 0.01
 text = "X AREA"
 font_size = 64
-outline_size = 12
 
 [node name="SignYAreaWest" type="Label3D" parent="."]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 18.5, 3.1, -14.15)
+script = ExtResource("paperlbl")
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 15.25, 3.1, -21.05)
 pixel_size = 0.01
 text = "Y AREA"
 font_size = 64
-outline_size = 12
 
 [node name="SignReception" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 3.2, 4.15)
+script = ExtResource("paperlbl")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 3.2, 2.15)
 pixel_size = 0.014
 text = "RECEPTION"
 font_size = 64
-outline_size = 12
 
 [node name="SignUtility" type="Label3D" parent="."]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 30, 3, -14.15)
+script = ExtResource("paperlbl")
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 31.75, 3, -21.05)
 pixel_size = 0.012
 text = "UTILITY - KEEP OUT"
 font_size = 64
-outline_size = 12
 
 [node name="SignSecondFloor" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 5.6, -18.7)
+script = ExtResource("paperlbl")
+hang_length = 0.7
+two_sided = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.4, 5.6, -26.3)
 pixel_size = 0.01
-billboard = 2
 text = "2ND FLOOR - NO STAIRS"
 font_size = 64
-outline_size = 12
 
 [node name="MezzanineWest" type="CSGBox3D" parent="." groups=["mezzanine"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.8, 3.3, -18.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.75, 3.3, -26.3)
 use_collision = true
-size = Vector3(11.4, 0.2, 9.4)
+size = Vector3(14.3, 0.2, 10.6)
 material = SubResource("Mat_wall")
 
 [node name="MezzanineEast" type="CSGBox3D" parent="." groups=["mezzanine"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.3, 3.3, -18.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.15, 3.3, -26.3)
 use_collision = true
-size = Vector3(11.4, 0.2, 9.4)
+size = Vector3(14.5, 0.2, 10.6)
 material = SubResource("Mat_wall")
 
 [node name="StorageZ" parent="." instance=ExtResource("14_region")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 11.8, 0.1, -12.6)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12.4, 0.1, -19.4)
 region_letter = "Z"
 corridor_count = 4
 random_levels = true
@@ -170,7 +172,7 @@ min_levels = 2
 columns_per_side = 9
 
 [node name="StorageX" parent="." instance=ExtResource("14_region")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 34.8, 0.1, -12.6)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 37.4, 0.1, -19.4)
 region_letter = "X"
 reverse_letters = true
 corridor_count = 4
@@ -179,9 +181,9 @@ min_levels = 2
 columns_per_side = 9
 
 [node name="StorageY" parent="." instance=ExtResource("14_region")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6, 0.1, -15.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.1, -22.9)
 region_letter = "Y"
-corridor_count = 7
+corridor_count = 8
 reverse_letters = true
 random_levels = true
 staircase_rows = Array[Vector2i]([Vector2i(3, 0), Vector2i(4, 1)])
@@ -189,7 +191,7 @@ columns_per_side = 5
 levels = 5
 
 [node name="StorageU" parent="." instance=ExtResource("14_region")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 3.4, -15.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.4, 3.4, -22.9)
 region_letter = "U"
 corridor_count = 3
 levels = 2
@@ -197,7 +199,7 @@ random_levels = true
 columns_per_side = 5
 
 [node name="StorageV" parent="." instance=ExtResource("14_region")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.4, 3.4, -15.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.8, 3.4, -22.9)
 region_letter = "V"
 corridor_count = 3
 levels = 2
@@ -208,107 +210,108 @@ columns_per_side = 5
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0.1, 5)
 
 [node name="BoxDispenser" parent="." unique_id=1730409124 instance=ExtResource("9_disp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.6, 0.1, 5.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.1, 0.1, 5.2)
 
 [node name="BoxDispenserSmall" parent="." instance=ExtResource("9_disp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.6, 0.1, 7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.1, 0.1, 7)
 box_scene = ExtResource("11_small")
 title = "SMALL BOXES"
 tint = Color(0.85, 0.72, 0.5, 1)
 prompt = "Take a small box"
 
 [node name="BoxDispenserBig" parent="." instance=ExtResource("9_disp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.6, 0.1, 8.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.1, 0.1, 8.8)
 box_scene = ExtResource("12_big")
 title = "BIG BOXES"
 tint = Color(0.55, 0.38, 0.2, 1)
 prompt = "Take a big box"
 
 [node name="Box1" parent="." unique_id=1569903437 instance=ExtResource("3_box")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.6, 0.1, 5.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.1, 0.1, 5.2)
 
 [node name="Box2" parent="." unique_id=393585612 instance=ExtResource("3_box")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.6, 0.1, 6.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.1, 0.1, 6.8)
 start_open = false
 
 [node name="CrateStack1" parent="." instance=ExtResource("15_stack")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 0.1, -12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63, 0.1, -14)
 
 [node name="CrateStack2" parent="." instance=ExtResource("15_stack")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0.1, -12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 0.1, -14)
 
 [node name="CrateStack3" parent="." instance=ExtResource("15_stack")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0.1, -12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72, 0.1, -14)
 
 [node name="SignBackStorage" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 3.4, -12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 3.4, -14)
 pixel_size = 0.006
-billboard = 2
 text = "EXTRA STOCK"
 font_size = 64
-outline_size = 12
+hang_length = 2.8
+two_sided = true
+script = ExtResource("paperlbl")
 
 [node name="ShelfA1" parent="." unique_id=1270346234 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.8, 0.14, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.3, 0.14, -6)
 item = ExtResource("5_cereal")
 
 [node name="ShelfA2" parent="." unique_id=1211739230 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.8, 0.65, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.3, 0.65, -6)
 shelf_id = "A2"
 item = ExtResource("6_soup")
 initial_stock = 7
 
 [node name="ShelfA3" parent="." unique_id=667140350 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.8, 1.16, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.3, 1.16, -6)
 shelf_id = "A3"
 item = ExtResource("7_water")
 initial_stock = 3
 
 [node name="ShelfB1" parent="." unique_id=761731666 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0.14, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 0.14, -6)
 shelf_id = "B1"
 item = ExtResource("6_soup")
 initial_stock = 9
 
 [node name="ShelfB2" parent="." unique_id=944457373 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0.65, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 0.65, -6)
 shelf_id = "B2"
 item = ExtResource("7_water")
 
 [node name="ShelfB3" parent="." unique_id=2125801642 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1.16, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 1.16, -6)
 shelf_id = "B3"
 item = ExtResource("5_cereal")
 initial_stock = 5
 
 [node name="ShelfC1" parent="." unique_id=212002162 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, 0.14, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69.7, 0.14, -6)
 shelf_id = "C1"
 item = ExtResource("7_water")
 initial_stock = 6
 
 [node name="ShelfC2" parent="." unique_id=1738694488 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, 0.65, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69.7, 0.65, -6)
 shelf_id = "C2"
 item = ExtResource("5_cereal")
 initial_stock = 10
 
 [node name="ShelfC3" parent="." unique_id=773092202 instance=ExtResource("4_shelf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, 1.16, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69.7, 1.16, -6)
 shelf_id = "C3"
 item = ExtResource("6_soup")
 
 [node name="SmokeSpot" parent="." instance=ExtResource("16_spot")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63, 0.1, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73, 0.1, -25)
 kind = 0
 
 [node name="PokerSpot" parent="." instance=ExtResource("16_spot")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, 0.1, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62, 0.1, -2.5)
 kind = 1
 duration = 4.0
 
 [node name="BlackMarketNPC" parent="." instance=ExtResource("17_market")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63, 0.1, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73, 0.1, -2.5)
 
 [node name="SupervisorManager" type="Node" parent="."]
 script = ExtResource("19_supervisors")
