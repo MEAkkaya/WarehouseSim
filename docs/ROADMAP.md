@@ -78,6 +78,8 @@ Goal: the push-your-luck loop works with packing alone. Decide here whether the 
 - [x] Apartment blocks in the neighbourhood (decor), gambling back room (weekdays) and underground night club (Fri-Sun nights)
 - [x] Warehouse loads/unloads in slices (walls first, shelves fill in ~1 s, no frame over ~15 ms in the test)
 - [x] Win at $1,000,000: pause, ending text, then "keep playing" (free play) or main menu
+- [x] City furniture (no models): street lamps with night light, utility poles with cables, dashed centre lines, roadside parking bays, a park with benches and a fenced dog-park pen. The rest of the wish list is in docs/TOWN_IDEAS.md
+- [x] A cliff wall round the town with a forested plateau (about 10,500 pines with two levels of detail), higher mountains, less fog, two tunnel portals in the cliff at the ends of the main road (closed shutters for now)
 
 ## Phase 8 - More mischief, slapstick fighting, audio, polish
 - [ ] SKIPPED (need assets or design input): audio, slapstick fighting (animations), stealing/hiding mischief, polish

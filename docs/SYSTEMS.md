@@ -6,7 +6,7 @@ WASD move, Shift sprint, Space jump, Ctrl/C crouch, mouse look, **Left click** i
 **Right click (hold)** throws it - the longer you hold, the harder (a bar fills under the crosshair and the item in your
 hand shakes more), **E** eat the selected edible item (takes 3 s, you cannot move meanwhile, and a supervisor who sees it catches you), **B** stick a bill from the hotbar
 on the box you aim at or carry (the selected bill, else the first one), **F** close/open the carried box, **R** take the last item out of the box you look at or carry (it must be open), **T** take the bill off
-that box (it goes to your hotbar, so you can stick it on another box), **Q** put down (also gets off the bike), 1-5 / wheel select hotbar, **P** phone.
+that box (it goes to your hotbar, so you can stick it on another box), **Q** put down (also gets off the bike), 1-5 / wheel select hotbar, **Esc** phone.
 While you carry a box the hotbar is locked (greyed out; no selecting, eating or throwing - boxes are never thrown): **Left click** puts the
 box down (unless you aim at something usable, e.g. the belt), **Q** does too.
 
@@ -117,6 +117,25 @@ can be climbed without knocking the stock off.
   Still numbers in TownLayout: the playable area, the neighbourhood zone, the woods, KEEP_OUT.
 - Data you can edit in the Inspector without code: data/items, data/events, data/furniture.
 
+- **Landscape, cliffs and tunnels** (`landscape.gd`, `hill_forest.gd`, `scenes/props/tunnel.tscn`): the town's sharp border is a CLIFF wall all
+  round it (a metre or two behind the invisible walls it rises 32-46 m within 5 m, with a meandering lip, rock strata and streaks painted on the face),
+  with a forested plateau on top that falls away gently, and mountain ranges (`max_height` 170 m) further out. One generated mesh (a RING of
+  vertices round the border, rows 0.75 m apart at the cliff and further apart outward, no collision); tune it with the exports of the `Landscape`
+  node (`cliff_height`, `cliff_start`, `cliff_jitter`, `cliff_width`, `plateau_end`, `max_height`). HillForest plants about 10,500 pines on the plateau and the
+  mountain slopes (not on the steep face): the full model (tree2.glb) within 170 m of you, a plain cone further out, cross-fading. Tunnels:
+  `tunnel.tscn` (CSG shell with an arched opening, lights, a shutter with a sign, runs along its local -Z) sits in the cliff foot, under the nodes
+  `Town/Tunnels`; the world border has a gap where a tunnel passes. Fog density is 0.0016 (it was 0.0045) in the Environment of world.tscn.
+- **Street furniture** (`scripts/world/street_furniture.gd`, shapes in `street_fixtures.gd`, no models): made at game start from
+  the TownRoad nodes. Each road has switches in the Inspector: `street_lamps` (every 26 m, alternating sides, a lit panel and a pool
+  of light at night, driven by the sun height), `utility_poles` (a pole every 34 m on one side, three cables with sag between
+  neighbouring poles; on in the scene for EntranceStreet, MainRoad, IndustrialRoad and NorthSouthStreet1/3/5), `center_line` (dashed
+  centre line, off for LakeRoad) and `parking` (painted bays on the left/right/both sides; EntranceStreet has both). Things keep off
+  crossing streets, the railway, lakes, the warehouse yard, buildings and props. Lamps and bays are MultiMesh chunks; poles have thin
+  colliders. Hand-placed lamps: `scenes/props/street_lamp.tscn` (script StreetLamp, `@tool`, arm along local +X). If you make a
+  lamp/pole model, replace the meshes in `StreetFixtures`.
+- **Park** (`Town/Props/Park`, plain nodes): lawn, paths with a small plaza, 8 benches (`scenes/props/bench.tscn`), 10 trees, 4 lamps and
+  a fenced "dog park" pen with a gate and sign (no dogs yet). Everything under `Town/Props` also keeps the generated vegetation off.
+
 ## Tuning numbers (all constants at the top of the scripts)
 Pay and multiplier, energy drain/regen, rent, ban length, rule count: GameState and Career.
 Supervisor sight and lecture timing: Supervisor exports. Heat thresholds: SupervisorManager exports.
@@ -160,7 +179,13 @@ New event = a script + a .tres, no other changes.
 - `TimedDoor` (scripts/props/timed_door.gd): exports `venue_name`, `open_days`, `open_from`, `open_to`. Locked doors
   always open from the inside. Every TimedDoor is listed (with open/closed) in the phone's **Places** app. To add a
   venue: build a room, put a TimedDoor in its doorway.
-- Phone apps: Bank, Map, Notices, Ranking, **Stats**, **Places**, **Quests**.
+- Phone (`scripts/ui/phone.gd`, **Esc** opens/closes it): a 340 x 590 screen with the home page showing four apps per row in a scrolling grid. The
+  apps show no name: hover one and its name appears under the grid. Icons: put `assets/icons/phone/<id>.png` (ids: bank, map, notices,
+  ranking, stats, places, quests, pause, settings, menu) and it replaces the letter on the button. Apps: Bank, Map, Notices, Ranking, **Stats**,
+  **Places**, **Quests**, **Pause** (freezes the whole game, the phone keeps working; putting the phone away resumes), **Settings** (volume,
+  fullscreen, sensitivity, saved when you leave the page) and **Main Menu** (`SaveGame.exit_to_main_menu()`: clocks you out if you are in the
+  warehouse, saves, leaves). The game does NOT pause while the phone is out. Settings and Main Menu do not count as phone use for the supervisors.
+  Every app's Back button returns to the home page. To add an app: one `_add_app(...)` line and a page in `_build_ui`.
 
 ## Loading the warehouse in slices
 - Entering: WarehouseSite instantiates warehouse.tscn, takes the children out of it (clearing their `owner`, which

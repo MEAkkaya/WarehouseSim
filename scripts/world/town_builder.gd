@@ -9,7 +9,9 @@ extends Node3D
 ##   - cuts the night club's stair shaft into the ground slab,
 ##   - puts an invisible fence round the lakes,
 ##   - lays sidewalks along every road and scatters vegetation (TownScenery, MultiMesh),
-##   - builds the world border and the scenery beyond it (Landscape).
+##   - adds street lamps, utility poles with cables and road markings (StreetFurniture),
+##   - builds the world border and the scenery beyond it (Landscape: forested hills, mountains and
+##     the hillsides of the tunnels; HillForest: their trees with two levels of detail).
 ## Nodes in the group "editor_only" (reference boxes) are removed when the game starts.
 
 ## The node with the hand-placed town (ground, roads, buildings...).
@@ -40,6 +42,7 @@ func _ready() -> void:
 	_build_lakes()
 	_build_ground()
 	_build_scenery()
+	_build_street_furniture()
 	_build_border()
 	_build_landscape()
 
@@ -241,17 +244,35 @@ func _build_scenery() -> void:
 	scenery.name = "Scenery"
 	scenery.occupied = _occupied
 	scenery.view_distance = view_distance
-	# Things already standing that the scatter must not grow through: hand-placed props
-	# and the hand-placed trees.
+	scenery.blockers = _collect_blockers()
+	add_child(scenery)
+	scenery.build()
+	print("TownBuilder: scenery ", scenery.get_counts())
+
+
+## Street lamps, utility poles with cables and road markings (StreetFurniture).
+func _build_street_furniture() -> void:
+	var furniture := StreetFurniture.new()
+	furniture.name = "StreetFurniture"
+	furniture.occupied = _occupied
+	furniture.view_distance = view_distance
+	furniture.blockers = _collect_blockers()
+	add_child(furniture)
+	furniture.build()
+	print("TownBuilder: street furniture ", furniture.get_counts())
+
+
+## Things already standing that the scatter and the street furniture must not grow through:
+## hand-placed props and the hand-placed trees.
+func _collect_blockers() -> Array[Vector2]:
+	var points: Array[Vector2] = []
 	for node_name in ["Props", "Trees"]:
 		var holder := _town.get_node_or_null(node_name)
 		if holder != null:
 			for child in holder.get_children():
 				if child is Node3D:
-					scenery.blockers.append(Vector2((child as Node3D).position.x, (child as Node3D).position.z))
-	add_child(scenery)
-	scenery.build()
-	print("TownBuilder: scenery ", scenery.get_counts())
+					points.append(Vector2((child as Node3D).position.x, (child as Node3D).position.z))
+	return points
 
 
 # ---- Scenery beyond the border -----------------------------------------------------
@@ -261,6 +282,12 @@ func _build_landscape() -> void:
 	landscape.name = "Landscape"
 	landscape.inner = TownLayout.BOUNDS
 	add_child(landscape)
+	var forest := HillForest.new()
+	forest.name = "HillForest"
+	forest.landscape = landscape
+	add_child(forest)
+	forest.build()
+	print("TownBuilder: hill trees ", forest.get_count())
 
 
 # ---- Invisible border ---------------------------------------------------------------
@@ -279,10 +306,44 @@ func _build_border() -> void:
 		[Vector3(bounds.position.x - thickness / 2.0, height / 2.0, bounds.get_center().y), Vector3(thickness, height, bounds.size.y)],
 		[Vector3(bounds.end.x + thickness / 2.0, height / 2.0, bounds.get_center().y), Vector3(thickness, height, bounds.size.y)],
 	]
-	for wall in walls:
-		var shape := CollisionShape3D.new()
+	# (a tunnel leaves the map through a gap in the wall)
+	var gaps: Array = [[], [], [], []]   # north, south, west, east
+	for tunnel in TownLayout.TUNNELS:
+		var spot: Vector2 = tunnel.spot
+		var dir: Vector2 = tunnel.dir
+		if absf(dir.y) > absf(dir.x):
+			gaps[0 if dir.y < 0.0 else 1].append(Vector2(spot.x - 7.0, spot.x + 7.0))
+		else:
+			gaps[2 if dir.x < 0.0 else 3].append(Vector2(spot.y - 7.0, spot.y + 7.0))
+	for k in walls.size():
+		_wall(body, walls[k][0], walls[k][1], gaps[k])
+
+
+## One border wall (a box centred at `center`), in pieces round the gaps (each gap is a range
+## along the wall's long side: world x for walls along x, world z for walls along z).
+func _wall(body: StaticBody3D, center: Vector3, size: Vector3, gaps: Array) -> void:
+	var along_x := size.x > size.z
+	var start := center.x - size.x / 2.0 if along_x else center.z - size.z / 2.0
+	var end := start + (size.x if along_x else size.z)
+	gaps.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
+	var pieces: Array[Vector2] = []
+	var cursor := start
+	for gap: Vector2 in gaps:
+		if gap.x > cursor:
+			pieces.append(Vector2(cursor, gap.x))
+		cursor = maxf(cursor, gap.y)
+	if cursor < end:
+		pieces.append(Vector2(cursor, end))
+	for piece in pieces:
+		var length := piece.y - piece.x
+		var middle := (piece.x + piece.y) / 2.0
 		var box := BoxShape3D.new()
-		box.size = wall[1]
+		var shape := CollisionShape3D.new()
+		if along_x:
+			box.size = Vector3(length, size.y, size.z)
+			shape.position = Vector3(middle, center.y, center.z)
+		else:
+			box.size = Vector3(size.x, size.y, length)
+			shape.position = Vector3(center.x, center.y, middle)
 		shape.shape = box
-		shape.position = wall[0]
 		body.add_child(shape)

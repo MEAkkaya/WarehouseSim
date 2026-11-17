@@ -1,18 +1,30 @@
 class_name Phone
 extends Control
 ## The player's phone: hidden at the bottom right of the screen, opened and put
-## away with the P key. It slides up; the HOME page shows the day and time and two
-## apps - Bank (balance and progress towards $1,000,000) and Map (navigation).
-## Each app has a Back button that puts the phone away.
+## away with the Esc key. It slides up; the HOME page shows the day and time and a grid
+## of apps, four to a row, that scrolls when there are more than fit. The apps show
+## no name: hover one to read it below the grid. Put an icon file at
+## assets/icons/phone/<app id>.png (ids: bank, map, notices, ranking, stats, places,
+## quests, pause, settings, menu) and it replaces the letter on the button.
 ##
-## The game does NOT pause while the phone is out - using it at work is a good way
-## to get caught. While it is open the mouse is free to tap the apps, so you cannot
-## look around (you can still walk).
+## Apps: Bank (balance and progress towards $1,000,000), Map, Notices, Ranking, Stats,
+## Places, Quests, Pause (pauses the game; closing the phone resumes it), Settings
+## (volume, fullscreen, mouse sensitivity) and Main Menu (saves and leaves).
+##
+## The game does NOT pause while the phone is out (unless you use the Pause app) -
+## using it at work is a good way to get caught. Settings and Main Menu do not count as
+## phone use for the supervisors. While it is open the mouse is free to tap the apps,
+## so you cannot look around (you can still walk).
 ##
 ## The whole screen is built in code below, which keeps the scene file trivial.
 
-const WIDTH := 250.0
-const HEIGHT := 480.0
+const WIDTH := 340.0
+const HEIGHT := 590.0
+## Apps per row on the home screen, the size of an app button and the gap between them.
+const APP_COLUMNS := 4
+const APP_SIZE := 64.0
+const APP_GAP := 12.0
+const ICON_FOLDER := "res://assets/icons/phone/"
 const MARGIN := 24.0
 
 ## How long the slide up/down takes, in seconds.
@@ -30,6 +42,15 @@ var _quests_page: Control
 var _quests_list: VBoxContainer
 var _stats_page: Control
 var _places_page: Control
+var _settings_page: Control
+var _menu_page: Control
+var _current_page: Control
+var _paused_label: Label
+var _app_caption: Label
+var _volume_slider: HSlider
+var _fullscreen_box: CheckBox
+var _sensitivity_slider: HSlider
+var _sensitivity_label: Label
 var _stats_label: Label
 var _places_label: Label
 var _rules_label: Label
@@ -52,6 +73,7 @@ func _ready() -> void:
 	_player = node as Player
 	set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	process_mode = Node.PROCESS_MODE_ALWAYS   # the phone works while the game is paused (Pause app)
 	_build_ui()
 	_apply_slide(0.0)
 	visible = false
@@ -82,10 +104,11 @@ func open() -> void:
 	is_open = true
 	visible = true
 	_show_page(_home_page)
+	_refresh_paused_label()
 	_refresh()
 	# A free cursor so the apps can be tapped.
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	GameState.set_phone_open(true)
+	_update_phone_use()
 	_slide_to(1.0)
 
 
@@ -93,9 +116,22 @@ func close() -> void:
 	if not is_open:
 		return
 	is_open = false
+	if _current_page == _settings_page:
+		GameSettings.save_settings()
+	if get_tree().paused:
+		get_tree().paused = false   # putting the phone away resumes a paused game
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	GameState.set_phone_open(false)
+	_update_phone_use()
 	_slide_to(0.0)
+
+
+## Settings and Main Menu are not "using the phone": the supervisors do not mind.
+func counts_as_phone_use() -> bool:
+	return is_open and _current_page != _settings_page and _current_page != _menu_page
+
+
+func _update_phone_use() -> void:
+	GameState.set_phone_open(counts_as_phone_use())
 
 
 func _slide_to(target: float) -> void:
@@ -157,11 +193,22 @@ func _money(amount: int) -> String:
 
 
 func _show_page(page: Control) -> void:
+	if _current_page == _settings_page and page != _settings_page:
+		GameSettings.save_settings()
+	_current_page = page
 	_refresh()
-	for p in [_home_page, _bank_page, _map_page, _rules_page, _ranking_page, _stats_page, _places_page, _quests_page]:
+	for p in [_home_page, _bank_page, _map_page, _rules_page, _ranking_page, _stats_page, _places_page,
+			_quests_page, _settings_page, _menu_page]:
 		p.visible = p == page
 	if page == _map_page:
 		_map.player = _player
+	if page == _settings_page:
+		_volume_slider.set_value_no_signal(GameSettings.master_volume)
+		_fullscreen_box.set_pressed_no_signal(GameSettings.fullscreen)
+		_sensitivity_slider.set_value_no_signal(GameSettings.mouse_sensitivity)
+		_update_sensitivity_label()
+	if is_open:
+		_update_phone_use()
 
 
 # ---- Building the screen -----------------------------------------------------------
@@ -186,22 +233,38 @@ func _build_ui() -> void:
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_day_label = _make_label(_home_page, "Monday", 22)
 	_day_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_add_spacer(_home_page)
+	_paused_label = _make_label(_home_page, "GAME PAUSED", 16)
+	_paused_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_paused_label.add_theme_color_override("font_color", Color(0.95, 0.8, 0.35))
+	_paused_label.custom_minimum_size = Vector2(0, 22)   # (keeps its room, so the grid does not jump)
+	_paused_label.text = ""
+	_add_gap(_home_page, 8)
+	# the apps: a grid that scrolls when it is taller than the space
+	var apps_scroll := ScrollContainer.new()
+	apps_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	apps_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_home_page.add_child(apps_scroll)
 	var apps := GridContainer.new()
-	apps.columns = 2
-	apps.add_theme_constant_override("h_separation", 18)
-	apps.add_theme_constant_override("v_separation", 8)
-	var apps_center := CenterContainer.new()
-	apps_center.add_child(apps)
-	_home_page.add_child(apps_center)
-	apps.add_child(_make_app_button("$\nBank", func() -> void: _show_page(_bank_page)))
-	apps.add_child(_make_app_button("N\nMap", func() -> void: _show_page(_map_page)))
-	apps.add_child(_make_app_button("!\nNotices", func() -> void: _show_page(_rules_page)))
-	apps.add_child(_make_app_button("#\nRanking", func() -> void: _show_page(_ranking_page)))
-	apps.add_child(_make_app_button("%\nStats", func() -> void: _show_page(_stats_page)))
-	apps.add_child(_make_app_button("@\nPlaces", func() -> void: _show_page(_places_page)))
-	apps.add_child(_make_app_button("?\nQuests", func() -> void: _show_page(_quests_page)))
-	_add_spacer(_home_page, 20)
+	apps.columns = APP_COLUMNS
+	apps.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	apps.add_theme_constant_override("h_separation", int(APP_GAP))
+	apps.add_theme_constant_override("v_separation", int(APP_GAP))
+	apps_scroll.add_child(apps)
+	_add_app(apps, "bank", "$", func() -> void: _show_page(_bank_page))
+	_add_app(apps, "map", "N", func() -> void: _show_page(_map_page))
+	_add_app(apps, "notices", "!", func() -> void: _show_page(_rules_page))
+	_add_app(apps, "ranking", "#", func() -> void: _show_page(_ranking_page))
+	_add_app(apps, "stats", "%", func() -> void: _show_page(_stats_page))
+	_add_app(apps, "places", "@", func() -> void: _show_page(_places_page))
+	_add_app(apps, "quests", "?", func() -> void: _show_page(_quests_page))
+	_add_app(apps, "pause", "II", _toggle_pause)
+	_add_app(apps, "settings", "=", func() -> void: _show_page(_settings_page))
+	_add_app(apps, "menu", "<", func() -> void: _show_page(_menu_page))
+	# the name of the app under the mouse (the buttons themselves show no name)
+	_app_caption = _make_label(_home_page, "", 18)
+	_app_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_app_caption.custom_minimum_size = Vector2(0, 30)
+	_add_gap(_home_page, 6)
 
 	# Bank app
 	_bank_page = VBoxContainer.new()
@@ -291,6 +354,51 @@ func _build_ui() -> void:
 	_add_spacer(_places_page)
 	_places_page.add_child(_make_back_button())
 
+	# Settings app: the same three settings as the main menu's, applied at once
+	_settings_page = VBoxContainer.new()
+	_settings_page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	pages.add_child(_settings_page)
+	_make_label(_settings_page, "SETTINGS", 22)
+	_add_spacer(_settings_page, 10)
+	_make_label(_settings_page, "Master volume", 15)
+	_volume_slider = _make_slider(_settings_page, 0.0, 1.0, 0.05)
+	_volume_slider.value_changed.connect(func(v: float) -> void:
+		GameSettings.master_volume = v
+		GameSettings.apply())
+	_add_spacer(_settings_page, 10)
+	_fullscreen_box = CheckBox.new()
+	_fullscreen_box.text = "Fullscreen"
+	_fullscreen_box.toggled.connect(func(on: bool) -> void:
+		GameSettings.fullscreen = on
+		GameSettings.apply())
+	_settings_page.add_child(_fullscreen_box)
+	_add_spacer(_settings_page, 10)
+	_sensitivity_label = _make_label(_settings_page, "", 15)
+	_sensitivity_slider = _make_slider(_settings_page, 0.0008, 0.006, 0.0001)
+	_sensitivity_slider.value_changed.connect(func(v: float) -> void:
+		GameSettings.mouse_sensitivity = v
+		if _player != null:
+			_player.mouse_sensitivity = v
+		_update_sensitivity_label())
+	_add_spacer(_settings_page)
+	_settings_page.add_child(_make_back_button())
+
+	# Main Menu app: save and leave to the main menu
+	_menu_page = VBoxContainer.new()
+	_menu_page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	pages.add_child(_menu_page)
+	_make_label(_menu_page, "MAIN MENU", 22)
+	_add_spacer(_menu_page, 10)
+	var menu_note := _make_label(_menu_page, "Leave to the main menu? The game is saved. If you are in the warehouse you are clocked out first (your shift is paid) and carried things stay behind.", 15)
+	menu_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_add_spacer(_menu_page)
+	var leave := Button.new()
+	leave.text = "Exit to main menu"
+	leave.custom_minimum_size = Vector2(0, 44)
+	leave.pressed.connect(func() -> void: SaveGame.exit_to_main_menu())
+	_menu_page.add_child(leave)
+	_menu_page.add_child(_make_back_button())
+
 
 ## Rebuilds the quest list: every quest with its title and (if it has one) description.
 func _refresh_quests() -> void:
@@ -339,6 +447,13 @@ func _make_label(parent: Control, text: String, font_size: int) -> Label:
 	return label
 
 
+## A fixed gap (a spacer takes all the space left over).
+func _add_gap(parent: Control, height: float) -> void:
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, height)
+	parent.add_child(gap)
+
+
 func _add_spacer(parent: Control, min_height: float = 0.0) -> void:
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -346,19 +461,71 @@ func _add_spacer(parent: Control, min_height: float = 0.0) -> void:
 	parent.add_child(spacer)
 
 
-func _make_app_button(text: String, on_pressed: Callable) -> Button:
+## An app button on the home screen: no name (it shows below the grid while the mouse is on it).
+## It shows assets/icons/phone/<id>.png when that file exists, else the `glyph`.
+func _add_app(grid: GridContainer, id: String, glyph: String, on_pressed: Callable) -> void:
 	var button := Button.new()
-	button.text = text
-	button.custom_minimum_size = Vector2(88, 68)
-	button.add_theme_font_size_override("font_size", 18)
+	button.custom_minimum_size = Vector2(APP_SIZE, APP_SIZE)
+	button.add_theme_font_size_override("font_size", 26)
+	var icon_path := ICON_FOLDER + id + ".png"
+	if ResourceLoader.exists(icon_path):
+		button.icon = load(icon_path)
+		button.expand_icon = true
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+	else:
+		button.text = glyph
 	button.pressed.connect(on_pressed)
-	return button
+	button.mouse_entered.connect(func() -> void: _app_caption.text = _app_name(id))
+	button.mouse_exited.connect(func() -> void: _app_caption.text = "")
+	grid.add_child(button)
 
 
-## Every app's Back button puts the phone away (the game never paused).
+## What an app is called (the caption under the grid).
+func _app_name(id: String) -> String:
+	match id:
+		"bank": return "Bank"
+		"map": return "Map"
+		"notices": return "Notices"
+		"ranking": return "Ranking"
+		"stats": return "Stats"
+		"places": return "Places"
+		"quests": return "Quests"
+		"pause": return "Resume game" if get_tree().paused else "Pause game"
+		"settings": return "Settings"
+		"menu": return "Main menu"
+	return id.capitalize()
+
+
+## The Pause app: freezes (or resumes) the whole game. Putting the phone away resumes it.
+func _toggle_pause() -> void:
+	get_tree().paused = not get_tree().paused
+	_refresh_paused_label()
+	_app_caption.text = _app_name("pause")
+
+
+func _refresh_paused_label() -> void:
+	_paused_label.text = "GAME PAUSED" if get_tree().paused else ""
+
+
+## Every app's Back button returns to the home screen (Esc puts the phone away).
 func _make_back_button() -> Button:
 	var button := Button.new()
 	button.text = "Back"
 	button.custom_minimum_size = Vector2(0, 40)
-	button.pressed.connect(close)
+	button.pressed.connect(func() -> void: _show_page(_home_page))
 	return button
+
+
+func _make_slider(parent: Control, low: float, high: float, step: float) -> HSlider:
+	var slider := HSlider.new()
+	slider.min_value = low
+	slider.max_value = high
+	slider.step = step
+	slider.custom_minimum_size = Vector2(0, 26)
+	parent.add_child(slider)
+	return slider
+
+
+func _update_sensitivity_label() -> void:
+	_sensitivity_label.text = "Mouse sensitivity (%.1f)" % (GameSettings.mouse_sensitivity / 0.0025)

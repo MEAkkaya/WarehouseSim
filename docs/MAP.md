@@ -100,9 +100,12 @@ Map coordinates are metres, x east, z south, origin = warehouse centre.
 - **Lakes** (south-east): three lakes, one with a sand beach, ringed with trees and
   fenced with invisible shore barriers; each lake is a real basin (bank, bed, water 0.7 m below the ground). **Farmland** with farm buildings and hedgerows
   to the east. Woods between neighbourhood and lakes.
+- **Park**: west of the neighbourhood, (-46, 120): lawn, benches, trees, lamps and a dog-park pen (`Town/Props/Park`).
 - **Trees**: 238 instances of `scenes/props/tree.tscn` (your tree1.glb + a trunk collider)
   placed by hand under `Town/Trees` in `world.tscn` with random rotations: rings around the
   lakes, woods and hedgerows along the fields. Move/delete/add them in the editor.
+- **Cliffs**: a cliff wall (about 40 m high) closes the town on every side, just behind the invisible border walls.
+- **Tunnels**: the main road leaves the map through two tunnels, north (185, -95) and west (-60, 298); each is a node under `Town/Tunnels`. The main road got two extra points so it meets the border straight.
 - **World border**: invisible walls around x -60..360, z -95..300, a huge ground slab
   beyond it, and distance fog (colour follows the sky) so the edge is never seen.
   Far chunks of houses/trees are also not drawn beyond `view_distance` (330 m).

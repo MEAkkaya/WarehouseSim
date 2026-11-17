@@ -105,6 +105,19 @@ func _check_out_and_quit() -> void:
 	get_tree().quit()
 
 
+## Leaves to the main menu (the phone's Main Menu app): like quitting inside the warehouse, you
+## are clocked out first (the shift is paid), then the game is saved.
+func exit_to_main_menu() -> void:
+	var player := get_tree().get_first_node_in_group("players") as Player
+	if _in_warehouse():
+		if player != null:
+			player.drop_everything()
+		GameState.clock_out()
+	save()
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+
+
 # ---- Reading ---------------------------------------------------------------------------
 
 func has_save() -> bool:

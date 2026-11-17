@@ -17,6 +17,9 @@
 [ext_resource type="PackedScene" path="res://scenes/props/tree.tscn" id="12_0e0f6"]
 [ext_resource type="Script" uid="uid://dh1alxi1qsp3d" path="res://scripts/world/town_builder.gd" id="13_68ntl"]
 [ext_resource type="Script" uid="uid://byjxt72fav5l7" path="res://scripts/world/paper_label.gd" id="paperlbl"]
+[ext_resource type="PackedScene" path="res://scenes/props/bench.tscn" id="park_bench"]
+[ext_resource type="PackedScene" path="res://scenes/props/street_lamp.tscn" id="park_lamp"]
+[ext_resource type="PackedScene" path="res://scenes/props/tunnel.tscn" id="park_tunnel"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -26,7 +29,7 @@ ambient_light_color = Color(0.75, 0.75, 0.8, 1)
 ambient_light_energy = 0.6
 fog_enabled = true
 fog_light_color = Color(0.55, 0.62, 0.7, 1)
-fog_density = 0.0045
+fog_density = 0.0016
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c1wn0"]
 albedo_color = Color(0.36, 0.52, 0.32, 1)
@@ -103,8 +106,8 @@ point_count = 4
 
 [sub_resource type="Curve3D" id="Curve3D_mpicw"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 185, 0, -95, 0, 0, 0, 0, 0, 0, 165, 0, 22, 0, 0, 0, 0, 0, 0, 134, 0, 112, 0, 0, 0, 0, 0, 0, 118, 0, 166, 0, 0, 0, 0, 0, 0, 56, 0, 240, 0, 0, 0, 0, 0, 0, -9, 0, 277, 0, 0, 0, 0, 0, 0, -60, 0, 298),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 185, 0, -95, 0, 0, 0, 0, 0, 0, 185, 0, -60, 0, 0, 0, 0, 0, 0, 165, 0, 22, 0, 0, 0, 0, 0, 0, 134, 0, 112, 0, 0, 0, 0, 0, 0, 118, 0, 166, 0, 0, 0, 0, 0, 0, 56, 0, 240, 0, 0, 0, 0, 0, 0, -9, 0, 277, 0, 0, 0, 0, 0, 0, -30, 0, 298, 0, 0, 0, 0, 0, 0, -60, 0, 298),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 7
 
@@ -1461,6 +1464,59 @@ size = Vector3(19.6, 14, 23.6)
 [sub_resource type="BoxShape3D" id="BoxShape3D_work"]
 size = Vector3(65.9, 14, 42.1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_park_lawn"]
+albedo_color = Color(0.45, 0.64, 0.36, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_park_path"]
+albedo_color = Color(0.76, 0.72, 0.62, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_park_fence"]
+albedo_color = Color(0.78, 0.78, 0.8, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_lawn"]
+material = SubResource("StandardMaterial3D_park_lawn")
+size = Vector3(21, 0.03, 38)
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_pathns"]
+material = SubResource("StandardMaterial3D_park_path")
+size = Vector3(2.2, 0.04, 38)
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_pathew"]
+material = SubResource("StandardMaterial3D_park_path")
+size = Vector3(21, 0.04, 2.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_plaza"]
+material = SubResource("StandardMaterial3D_park_path")
+size = Vector3(6, 0.045, 6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_rail6"]
+material = SubResource("StandardMaterial3D_park_fence")
+size = Vector3(6.0, 0.06, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_post"]
+material = SubResource("StandardMaterial3D_park_fence")
+size = Vector3(0.1, 1.1, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_park_fence6"]
+size = Vector3(6.0, 1.1, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_rail12"]
+material = SubResource("StandardMaterial3D_park_fence")
+size = Vector3(12.0, 0.06, 0.06)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_park_fence12"]
+size = Vector3(12.0, 1.1, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_park_rail4"]
+material = SubResource("StandardMaterial3D_park_fence")
+size = Vector3(4.0, 0.06, 0.06)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_park_fence4"]
+size = Vector3(4.0, 1.1, 0.1)
+
 [node name="World" type="Node3D" unique_id=413120644]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1421811102]
@@ -1527,17 +1583,21 @@ mesh = SubResource("BoxMesh_fn2yc")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 curve = SubResource("Curve3D_3gn3b")
 script = ExtResource("2_px3xn")
+utility_poles = true
+parking = 3
 
 [node name="IndustrialRoad" type="Path3D" parent="Town/Roads" unique_id=438453248]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 curve = SubResource("Curve3D_3qr4o")
 script = ExtResource("2_px3xn")
+utility_poles = true
 width = 8.0
 
 [node name="MainRoad" type="Path3D" parent="Town/Roads" unique_id=1703071363]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 curve = SubResource("Curve3D_mpicw")
 script = ExtResource("2_px3xn")
+utility_poles = true
 width = 10.0
 
 [node name="IndustrialRingWest" type="Path3D" parent="Town/Roads" unique_id=1183342319]
@@ -1554,12 +1614,14 @@ script = ExtResource("2_px3xn")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 curve = SubResource("Curve3D_l583n")
 script = ExtResource("2_px3xn")
+center_line = false
 width = 5.0
 
 [node name="NorthSouthStreet1" type="Path3D" parent="Town/Roads" unique_id=1910750224]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 curve = SubResource("Curve3D_5x8su")
 script = ExtResource("2_px3xn")
+utility_poles = true
 width = 5.2
 lift = 0.015
 
@@ -1567,6 +1629,7 @@ lift = 0.015
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 curve = SubResource("Curve3D_gjfgj")
 script = ExtResource("2_px3xn")
+utility_poles = true
 width = 5.2
 lift = 0.015
 
@@ -1581,6 +1644,7 @@ lift = 0.015
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 curve = SubResource("Curve3D_6sr5u")
 script = ExtResource("2_px3xn")
+utility_poles = true
 width = 5.2
 lift = 0.015
 
@@ -4856,3 +4920,276 @@ shape = SubResource("BoxShape3D_work")
 
 [node name="Player" parent="." unique_id=1020110485 instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 100)
+
+[node name="Park" type="Node3D" parent="Town/Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 0.09, 120)
+
+[node name="Lawn" type="MeshInstance3D" parent="Town/Props/Park"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+mesh = SubResource("BoxMesh_park_lawn")
+
+[node name="PathNorthSouth" type="MeshInstance3D" parent="Town/Props/Park"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("BoxMesh_park_pathns")
+
+[node name="PathEastWest" type="MeshInstance3D" parent="Town/Props/Park"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -5)
+mesh = SubResource("BoxMesh_park_pathew")
+
+[node name="Plaza" type="MeshInstance3D" parent="Town/Props/Park"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0225, -5)
+mesh = SubResource("BoxMesh_park_plaza")
+
+[node name="Benches" type="Node3D" parent="Town/Props/Park"]
+
+[node name="Bench1" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -2.3, 0.03, -14)
+
+[node name="Bench2" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.3, 0.03, -14)
+
+[node name="Bench3" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -2.3, 0.03, 5)
+
+[node name="Bench4" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.3, 0.03, 5)
+
+[node name="Bench5" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -2.3, 0.03, 14)
+
+[node name="Bench6" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.3, 0.03, 14)
+
+[node name="Bench7" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -3.8, 0.03, -5)
+
+[node name="Bench8" parent="Town/Props/Park/Benches" instance=ExtResource("park_bench")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 3.8, 0.03, -5)
+
+[node name="Trees" type="Node3D" parent="Town/Props/Park"]
+
+[node name="Tree1" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(0.86603, 0, 0.5, 0, 1, 0, -0.5, 0, 0.86603, -7, 0, -15)
+
+[node name="Tree2" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(-0.34202, 0, 0.93969, 0, 1, 0, -0.93969, 0, -0.34202, 7, 0, -14.5)
+
+[node name="Tree3" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(-0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.93969, -8, 0, -9)
+
+[node name="Tree4" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(0.34202, 0, 0.93969, 0, 1, 0, -0.93969, 0, 0.34202, 8, 0, -9.5)
+
+[node name="Tree5" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(-0.76604, 0, 0.64279, 0, 1, 0, -0.64279, 0, -0.76604, -8, 0, -2)
+
+[node name="Tree6" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(0.98481, 0, 0.17365, 0, 1, 0, -0.17365, 0, 0.98481, 8.5, 0, 0)
+
+[node name="Tree7" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(-0.34202, 0, -0.93969, 0, 1, 0, 0.93969, 0, -0.34202, 7.5, 0, 9)
+
+[node name="Tree8" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 8.5, 0, 16)
+
+[node name="Tree9" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(0.5, 0, -0.86603, 0, 1, 0, 0.86603, 0, 0.5, -6.5, 0, -16.5)
+
+[node name="Tree10" parent="Town/Props/Park/Trees" instance=ExtResource("12_0e0f6")]
+transform = Transform3D(0.5, 0, 0.86603, 0, 1, 0, -0.86603, 0, 0.5, 5, 0, 1.5)
+
+[node name="Lamps" type="Node3D" parent="Town/Props/Park"]
+
+[node name="Lamp1" parent="Town/Props/Park/Lamps" instance=ExtResource("park_lamp")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, -1.8, 0.03, -12)
+
+[node name="Lamp2" parent="Town/Props/Park/Lamps" instance=ExtResource("park_lamp")]
+transform = Transform3D(-0.8, 0, 0, 0, 0.8, 0, 0, 0, -0.8, 1.8, 0.03, -12)
+
+[node name="Lamp3" parent="Town/Props/Park/Lamps" instance=ExtResource("park_lamp")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, -1.8, 0.03, 12)
+
+[node name="Lamp4" parent="Town/Props/Park/Lamps" instance=ExtResource("park_lamp")]
+transform = Transform3D(-0.8, 0, 0, 0, 0.8, 0, 0, 0, -0.8, 1.8, 0.03, 12)
+
+[node name="DogPark" type="Node3D" parent="Town/Props/Park"]
+
+[node name="Fence1" type="StaticBody3D" parent="Town/Props/Park/DogPark"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.03, 6)
+
+[node name="RailTop" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("BoxMesh_park_rail6")
+
+[node name="RailLow" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_park_rail6")
+
+[node name="Post1" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post2" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post3" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post4" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Collision" type="CollisionShape3D" parent="Town/Props/Park/DogPark/Fence1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_park_fence6")
+
+[node name="Fence2" type="StaticBody3D" parent="Town/Props/Park/DogPark"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.03, 18)
+
+[node name="RailTop" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("BoxMesh_park_rail6")
+
+[node name="RailLow" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_park_rail6")
+
+[node name="Post1" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post2" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post3" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post4" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Collision" type="CollisionShape3D" parent="Town/Props/Park/DogPark/Fence2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_park_fence6")
+
+[node name="Fence3" type="StaticBody3D" parent="Town/Props/Park/DogPark"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -10, 0.03, 12)
+
+[node name="RailTop" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("BoxMesh_park_rail12")
+
+[node name="RailLow" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_park_rail12")
+
+[node name="Post1" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post2" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post3" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post4" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post5" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post6" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post7" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Collision" type="CollisionShape3D" parent="Town/Props/Park/DogPark/Fence3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_park_fence12")
+
+[node name="Fence4" type="StaticBody3D" parent="Town/Props/Park/DogPark"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -4, 0.03, 8)
+
+[node name="RailTop" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("BoxMesh_park_rail4")
+
+[node name="RailLow" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_park_rail4")
+
+[node name="Post1" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post2" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post3" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Collision" type="CollisionShape3D" parent="Town/Props/Park/DogPark/Fence4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_park_fence4")
+
+[node name="Fence5" type="StaticBody3D" parent="Town/Props/Park/DogPark"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -4, 0.03, 15)
+
+[node name="RailTop" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("BoxMesh_park_rail6")
+
+[node name="RailLow" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_park_rail6")
+
+[node name="Post1" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post2" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post3" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Post4" type="MeshInstance3D" parent="Town/Props/Park/DogPark/Fence5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.55, 0)
+mesh = SubResource("BoxMesh_park_post")
+
+[node name="Collision" type="CollisionShape3D" parent="Town/Props/Park/DogPark/Fence5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_park_fence6")
+
+[node name="Sign" type="Label3D" parent="Town/Props/Park/DogPark"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -2.7, 1.8, 8.8)
+pixel_size = 0.012
+text = "DOG PARK"
+font_size = 56
+script = ExtResource("paperlbl")
+two_sided = true
+post_to_y = 0.0
+
+[node name="Tunnels" type="Node3D" parent="Town"]
+
+[node name="TunnelNorth" parent="Town/Tunnels" instance=ExtResource("park_tunnel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 0.09, -95)
+
+[node name="TunnelWest" parent="Town/Tunnels" instance=ExtResource("park_tunnel")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -60, 0.09, 298)

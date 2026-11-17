@@ -29,6 +29,17 @@ enum Kind { ROAD, RAIL }
 		lift = value
 		_refresh()
 
+## What the game adds along this road (StreetFurniture; they show only in the game).
+## Street lamps, alternating sides.
+@export var street_lamps: bool = true
+## Utility poles with cables between them (one side of the road).
+@export var utility_poles: bool = false
+## A dashed line down the middle.
+@export var center_line: bool = true
+## Painted parking bays at the edge of the road (left / right when walking along the road
+## from its first point to its last).
+@export_enum("None", "Left", "Right", "Both") var parking: int = 0
+
 const ROAD_COLOR := Color(0.27, 0.27, 0.3)
 const BALLAST_COLOR := Color(0.42, 0.4, 0.38)
 const STEEL_COLOR := Color(0.12, 0.12, 0.14)

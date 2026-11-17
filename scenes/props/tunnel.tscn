@@ -1,0 +1,131 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/paper_label.gd" id="1_label"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_concrete"]
+albedo_color = Color(0.55, 0.55, 0.52, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_asphalt"]
+albedo_color = Color(0.27, 0.27, 0.3, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shutter"]
+albedo_color = Color(0.32, 0.34, 0.36, 1)
+roughness = 0.6
+metallic = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lamp"]
+albedo_color = Color(1, 0.95, 0.8, 1)
+emission_enabled = true
+emission = Color(1, 0.85, 0.55, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_road"]
+material = SubResource("StandardMaterial3D_asphalt")
+size = Vector3(10, 0.02, 36)
+
+[sub_resource type="BoxMesh" id="BoxMesh_strip"]
+material = SubResource("StandardMaterial3D_lamp")
+size = Vector3(0.6, 0.1, 1.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_shutter"]
+material = SubResource("StandardMaterial3D_shutter")
+size = Vector3(11.4, 9.9, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shutter"]
+size = Vector3(11.4, 9.9, 0.5)
+
+[node name="Tunnel" type="Node3D"]
+
+[node name="Shell" type="CSGCombiner3D" parent="."]
+use_collision = true
+
+[node name="Outer" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, -18)
+size = Vector3(15, 11, 36)
+material = SubResource("StandardMaterial3D_concrete")
+
+[node name="Facade" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, -0.7)
+size = Vector3(19, 13, 1.4)
+material = SubResource("StandardMaterial3D_concrete")
+
+[node name="CutBox" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, -18)
+operation = 2
+size = Vector3(11, 4.2, 40)
+
+[node name="CutArch" type="CSGCylinder3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 4.2, -18)
+operation = 2
+radius = 5.5
+height = 40.0
+sides = 24
+
+[node name="Floor" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -18)
+size = Vector3(11, 0.6, 36)
+material = SubResource("StandardMaterial3D_concrete")
+
+[node name="Road" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.011, -18)
+mesh = SubResource("BoxMesh_road")
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="Strip1" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.55, -5)
+mesh = SubResource("BoxMesh_strip")
+
+[node name="Strip2" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.55, -14)
+mesh = SubResource("BoxMesh_strip")
+
+[node name="Strip3" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.55, -23)
+mesh = SubResource("BoxMesh_strip")
+
+[node name="Strip4" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.55, -32)
+mesh = SubResource("BoxMesh_strip")
+
+[node name="Light1" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, -5)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 1.6
+omni_range = 14.0
+
+[node name="Light2" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, -14)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 1.6
+omni_range = 14.0
+
+[node name="Light3" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, -23)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 1.6
+omni_range = 14.0
+
+[node name="Light4" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, -32)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 1.6
+omni_range = 14.0
+
+[node name="Shutter" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.95, -35.75)
+
+[node name="Mesh" type="MeshInstance3D" parent="Shutter"]
+mesh = SubResource("BoxMesh_shutter")
+
+[node name="Collision" type="CollisionShape3D" parent="Shutter"]
+shape = SubResource("BoxShape3D_shutter")
+
+[node name="Sign" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, -35.45)
+pixel_size = 0.012
+text = "TOWN EXIT\nCLOSED FOR MAINTENANCE"
+font_size = 56
+script = ExtResource("1_label")

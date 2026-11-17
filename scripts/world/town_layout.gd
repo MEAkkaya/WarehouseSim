@@ -28,8 +28,11 @@ static var CLUB_SPOT := Vector2(60, 130)
 static var STATION_SPOT := Vector2(121.5, 108)
 
 ## ---- Filled by scan() from the nodes of the scene ----------------------------------
-## Roads: {name, width, points (PackedVector2Array)} (TownRoad nodes of kind ROAD).
+## Roads: {name, width, points (PackedVector2Array), lift, lamps, poles, parking, center_line} (TownRoad nodes of kind ROAD).
 static var ROADS: Array[Dictionary] = []
+## The tunnel portals (the nodes under Town/Tunnels): {spot (x, z of the portal), dir (x, z, the way
+## the tunnel runs, away from the town)}.
+static var TUNNELS: Array[Dictionary] = []
 ## The railway line (the TownRoad of kind RAIL).
 static var RAIL: PackedVector2Array = PackedVector2Array()
 const RAIL_HALF_WIDTH := 3.0
@@ -62,6 +65,15 @@ static func scan(town: Node) -> void:
 	RAIL = PackedVector2Array()
 	LAKES.clear()
 	FIELDS.clear()
+	TUNNELS.clear()
+	var tunnels := town.get_node_or_null("Tunnels")
+	if tunnels != null:
+		for node in tunnels.get_children():
+			var tunnel := node as Node3D
+			if tunnel != null:
+				var forward := -tunnel.global_transform.basis.z   # a tunnel runs along its local -Z
+				TUNNELS.append({"spot": Vector2(tunnel.global_position.x, tunnel.global_position.z),
+						"dir": Vector2(forward.x, forward.z).normalized()})
 	var roads := town.get_node_or_null("Roads")
 	if roads != null:
 		for node in roads.get_children():
@@ -75,7 +87,9 @@ static func scan(town: Node) -> void:
 				if RAIL.is_empty():
 					RAIL = line
 			else:
-				ROADS.append({"name": String(road.name), "width": road.width, "points": line})
+				ROADS.append({"name": String(road.name), "width": road.width, "points": line, "lift": road.lift,
+						"lamps": road.street_lamps, "poles": road.utility_poles, "parking": road.parking,
+						"center_line": road.center_line})
 	var lakes := town.get_node_or_null("Lakes")
 	if lakes != null:
 		for node in lakes.get_children():

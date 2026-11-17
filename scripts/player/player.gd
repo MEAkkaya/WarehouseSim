@@ -288,16 +288,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if busy and not event is InputEventMouseMotion:
 		return  # smoking or gambling: only looking around is possible
 	# While the phone is out the mouse belongs to its screen: clicks and the wheel
-	# do nothing in the world (the apps handle their own clicks), and Esc puts the
-	# phone away. The game keeps running and you can still walk.
-	if hud.phone.is_open:
-		if event is InputEventMouseButton:
-			return
-		if event.is_action_pressed("ui_cancel"):
-			hud.phone.close()
-			return
-	# After Esc the mouse is free: the next click only recaptures it (it must not
-	# also count as an interaction).
+	# do nothing in the world (the apps handle their own clicks). Esc opens and puts
+	# away the phone (Phone handles that key). The game keeps running and you can
+	# still walk, unless you pressed the Pause app.
+	if hud.phone.is_open and event is InputEventMouseButton:
+		return
+	# After the phone is put away the mouse may be free (e.g. after alt-tabbing): the
+	# next click only recaptures it (it must not also count as an interaction).
 	if event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		return
@@ -343,8 +340,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			inventory.select(event.physical_keycode - KEY_1)  # number keys 1..n
 		else:
 			_hotbar_locked_notice()
-	elif event.is_action_pressed("ui_cancel"):  # Esc frees the mouse
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 ## True when no box is in the hands.
@@ -861,7 +856,7 @@ func has_condition(condition: StringName) -> bool:
 		&"idle":
 			return _idle_time > 6.0
 		&"phone":
-			return hud.phone.is_open
+			return hud.phone.counts_as_phone_use()
 		&"smoking":
 			return activity == &"smoking"
 		&"gambling":
