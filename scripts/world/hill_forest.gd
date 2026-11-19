@@ -59,7 +59,14 @@ func build() -> void:
 			if tree == Transform3D.IDENTITY:
 				continue
 			near_trees.append(tree)
-			far_trees.append(tree)
+	# Random order, so that a chunk showing only its first N trees (the graphics setting
+	# "Forest") is thinned evenly instead of losing a strip.
+	for i in range(near_trees.size() - 1, 0, -1):
+		var j := _rng.randi_range(0, i)
+		var swap := near_trees[i]
+		near_trees[i] = near_trees[j]
+		near_trees[j] = swap
+	far_trees = near_trees.duplicate()
 	_count = near_trees.size()
 	_batch_model(near_trees)
 	_batch_cones(far_trees)
@@ -97,6 +104,7 @@ func _batch_model(trees: Array[Transform3D]) -> void:
 		return
 	var root := (load(MODEL) as PackedScene).instantiate() as Node3D
 	var parts: Array[Dictionary] = []
+	var leaf_materials := Foliage.make_materials(root, 0.06)
 	for node in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
 		var local := Transform3D.IDENTITY
@@ -104,7 +112,7 @@ func _batch_model(trees: Array[Transform3D]) -> void:
 		while walker != root:
 			local = (walker as Node3D).transform * local
 			walker = walker.get_parent()
-		parts.append({"mesh": mesh_instance.mesh, "local": local})
+		parts.append({"mesh": mesh_instance.mesh, "local": local, "material": leaf_materials.get(mesh_instance)})
 	root.free()
 	var group := Node3D.new()
 	group.name = "Pines"
@@ -115,10 +123,13 @@ func _batch_model(trees: Array[Transform3D]) -> void:
 			var list: Array = chunks[key]
 			var holder := _holder(part.mesh as Mesh, list, part.local as Transform3D)
 			holder.name = "Chunk_%d_%d" % [key.x, key.y]
+			if part.material != null:
+				holder.material_override = part.material
 			holder.visibility_range_end = near_range
 			holder.visibility_range_end_margin = 25.0
 			holder.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			group.add_child(holder)
+			Graphics.register_thinnable(holder, "forest")
 
 
 func _batch_cones(trees: Array[Transform3D]) -> void:
@@ -150,6 +161,7 @@ func _batch_cones(trees: Array[Transform3D]) -> void:
 		holder.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		holder.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		group.add_child(holder)
+		Graphics.register_thinnable(holder, "forest")
 
 
 func _chunks(trees: Array[Transform3D]) -> Dictionary:

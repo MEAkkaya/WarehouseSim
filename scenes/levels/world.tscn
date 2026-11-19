@@ -20,16 +20,36 @@
 [ext_resource type="PackedScene" path="res://scenes/props/bench.tscn" id="park_bench"]
 [ext_resource type="PackedScene" path="res://scenes/props/street_lamp.tscn" id="park_lamp"]
 [ext_resource type="PackedScene" path="res://scenes/props/tunnel.tscn" id="park_tunnel"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/waffle_diner.tscn" id="waffle_diner"]
+[ext_resource type="Shader" path="res://assets/shaders/sky_clouds.gdshader" id="sky_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sky"]
+shader = ExtResource("sky_shader")
+
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("ShaderMaterial_sky")
+process_mode = 2
 
 [sub_resource type="Environment" id="Environment_main"]
-background_mode = 1
-background_color = Color(0.55, 0.62, 0.7, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.75, 0.75, 0.8, 1)
-ambient_light_energy = 0.6
+background_mode = 2
+sky = SubResource("Sky_main")
+ambient_light_source = 3
+ambient_light_sky_contribution = 1.0
+ambient_light_energy = 1.0
+tonemap_mode = 4
+tonemap_exposure = 1.1
+tonemap_agx_contrast = 1.3
+ssao_enabled = true
+ssao_radius = 1.4
+ssao_intensity = 2.4
+ssil_enabled = true
+ssil_radius = 6.0
+sdfgi_enabled = true
+sdfgi_energy = 1.3
 fog_enabled = true
-fog_light_color = Color(0.55, 0.62, 0.7, 1)
+fog_light_color = Color(0.72, 0.83, 0.93, 1)
 fog_density = 0.0016
+fog_sky_affect = 0.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c1wn0"]
 albedo_color = Color(0.36, 0.52, 0.32, 1)
@@ -4186,23 +4206,11 @@ transform = Transform3D(0.2444, 0, -0.9697, 0, 1, 0, 0.9697, 0, 0.2444, 166.13, 
 [node name="Tree86" parent="Town/Trees" unique_id=1268026333 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(-0.7874, 0, -0.6165, 0, 1, 0, 0.6165, 0, -0.7874, 166.32, 0.09, 101.43)
 
-[node name="Tree87" parent="Town/Trees" unique_id=1681910953 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.6098, 0, 0.7925, 0, 1, 0, -0.7925, 0, 0.6098, 166.5, 0.09, 81.6)
-
 [node name="Tree88" parent="Town/Trees" unique_id=720698919 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(-0.6285, 0, 0.7778, 0, 1, 0, -0.7778, 0, -0.6285, 168.08, 0.09, 162.14)
 
-[node name="Tree89" parent="Town/Trees" unique_id=1214071467 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.8078, 0, -0.5895, 0, 1, 0, 0.5895, 0, 0.8078, 168.79, 0.09, 74.67)
-
-[node name="Tree90" parent="Town/Trees" unique_id=878613812 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.9977, 0, 0.0672, 0, 1, 0, -0.0672, 0, 0.9977, 171.12, 0.09, 85.74)
-
 [node name="Tree91" parent="Town/Trees" unique_id=409218842 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.2289, 0, -0.9734, 0, 1, 0, 0.9734, 0, 0.2289, 171.95, 0.09, 103.52)
-
-[node name="Tree92" parent="Town/Trees" unique_id=841883694 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(-0.052, 0, -0.9986, 0, 1, 0, 0.9986, 0, -0.052, 173.04, 0.09, 82.54)
 
 [node name="Tree93" parent="Town/Trees" unique_id=720082003 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.1421, 0, 0.9899, 0, 1, 0, -0.9899, 0, 0.1421, 174.3, 0.09, 251.84)
@@ -4215,9 +4223,6 @@ transform = Transform3D(-0.287, 0, -0.9579, 0, 1, 0, 0.9579, 0, -0.287, 174.58, 
 
 [node name="Tree96" parent="Town/Trees" unique_id=1200300218 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.8955, 0, -0.445, 0, 1, 0, 0.445, 0, 0.8955, 174.69, 0.09, 253.37)
-
-[node name="Tree97" parent="Town/Trees" unique_id=1273331212 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.8439, 0, -0.5364, 0, 1, 0, 0.5364, 0, 0.8439, 175.91, 0.09, 80.65)
 
 [node name="Tree98" parent="Town/Trees" unique_id=556040620 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(-0.8679, 0, 0.4967, 0, 1, 0, -0.4967, 0, -0.8679, 176.44, 0.09, 262.14)
@@ -4249,9 +4254,6 @@ transform = Transform3D(0.6685, 0, 0.7437, 0, 1, 0, -0.7437, 0, 0.6685, 181.13, 
 [node name="Tree107" parent="Town/Trees" unique_id=1568259979 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.4096, 0, -0.9122, 0, 1, 0, 0.9122, 0, 0.4096, 183.38, 0.09, 252.85)
 
-[node name="Tree108" parent="Town/Trees" unique_id=2033478702 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.5666, 0, -0.824, 0, 1, 0, 0.824, 0, 0.5666, 183.46, 0.09, 85.01)
-
 [node name="Tree109" parent="Town/Trees" unique_id=94421152 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.839, 0, 0.5442, 0, 1, 0, -0.5442, 0, 0.839, 184.29, 0.09, 98.39)
 
@@ -4261,23 +4263,11 @@ transform = Transform3D(0.4132, 0, 0.9106, 0, 1, 0, -0.9106, 0, 0.4132, 184.34, 
 [node name="Tree111" parent="Town/Trees" unique_id=107282356 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.0032, 0, -1, 0, 1, 0, 1, 0, 0.0032, 184.4, 0.09, 97.19)
 
-[node name="Tree112" parent="Town/Trees" unique_id=658987127 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.3693, 0, -0.9293, 0, 1, 0, 0.9293, 0, 0.3693, 184.5, 0.09, 70.61)
-
 [node name="Tree113" parent="Town/Trees" unique_id=2031556380 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(-0.0664, 0, 0.9978, 0, 1, 0, -0.9978, 0, -0.0664, 184.59, 0.09, 281.78)
 
 [node name="Tree114" parent="Town/Trees" unique_id=1834991582 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.9307, 0, 0.3658, 0, 1, 0, -0.3658, 0, 0.9307, 184.64, 0.09, 96.03)
-
-[node name="Tree115" parent="Town/Trees" unique_id=1511540755 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.3293, 0, -0.9442, 0, 1, 0, 0.9442, 0, 0.3293, 185.05, 0.09, 87.37)
-
-[node name="Tree116" parent="Town/Trees" unique_id=13752245 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.9513, 0, 0.3082, 0, 1, 0, -0.3082, 0, 0.9513, 186.11, 0.09, 84.61)
-
-[node name="Tree117" parent="Town/Trees" unique_id=1250004641 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.7383, 0, 0.6745, 0, 1, 0, -0.6745, 0, 0.7383, 187.15, 0.09, 70.53)
 
 [node name="Tree118" parent="Town/Trees" unique_id=1373095053 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(-0.7958, 0, 0.6056, 0, 1, 0, -0.6056, 0, -0.7958, 189.14, 0.09, 98.66)
@@ -4285,17 +4275,8 @@ transform = Transform3D(-0.7958, 0, 0.6056, 0, 1, 0, -0.6056, 0, -0.7958, 189.14
 [node name="Tree119" parent="Town/Trees" unique_id=472879873 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(-0.8807, 0, -0.4737, 0, 1, 0, 0.4737, 0, -0.8807, 189.6, 0.09, 100.25)
 
-[node name="Tree120" parent="Town/Trees" unique_id=1609536447 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.7946, 0, -0.6071, 0, 1, 0, 0.6071, 0, 0.7946, 190.15, 0.09, 73.3)
-
 [node name="Tree121" parent="Town/Trees" unique_id=735366182 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(0.9706, 0, -0.2407, 0, 1, 0, 0.2407, 0, 0.9706, 190.22, 0.09, 96.6)
-
-[node name="Tree122" parent="Town/Trees" unique_id=265719593 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.9726, 0, 0.2323, 0, 1, 0, -0.2323, 0, 0.9726, 191.63, 0.09, 70.23)
-
-[node name="Tree123" parent="Town/Trees" unique_id=481816858 instance=ExtResource("12_0e0f6")]
-transform = Transform3D(0.0728, 0, -0.9973, 0, 1, 0, 0.9973, 0, 0.0728, 192.51, 0.09, 86.5)
 
 [node name="Tree124" parent="Town/Trees" unique_id=1246687497 instance=ExtResource("12_0e0f6")]
 transform = Transform3D(-0.2815, 0, 0.9596, 0, 1, 0, -0.9596, 0, -0.2815, 193.62, 0.09, 163)
@@ -5193,3 +5174,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 0.09, -95)
 
 [node name="TunnelWest" parent="Town/Tunnels" instance=ExtResource("park_tunnel")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -60, 0.09, 298)
+
+[node name="WaffleDiner" parent="Town/Buildings" instance=ExtResource("waffle_diner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 178, 0.09, 62)

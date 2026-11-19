@@ -22,7 +22,9 @@ const CAUGHT_BAN_HOURS: float = 3.0
 const EVENT_CHANCE: float = 0.32
 ## A new game starts quietly: no events on the first this-many days.
 const EVENT_FREE_DAYS: int = 3
-const RENT_PER_DAY: int = 40
+## Rent is paid once a week, at the midnight that starts Monday (a new game starts on a
+## Monday, so the first rent falls due after the first Sunday).
+const RENT_PER_WEEK: int = 25
 const BEST_EMPLOYEE_BONUS: int = 150
 ## You need at least this many correct orders in a day to count as "best employee".
 const ORDERS_FOR_BONUS: int = 3
@@ -207,18 +209,20 @@ func _on_minute() -> void:
 		employee.score += employee.skill * NPC_ORDERS_PER_HOUR / 60.0 * randf_range(0.4, 1.6)
 
 
-## Midnight: best-employee bonus, rent, a new ranking and a new event (or none).
+## Midnight: best-employee bonus, rent (Mondays only), a new ranking and a new event (or none).
 func _on_new_day(_day: int) -> void:
 	if orders_today >= ORDERS_FOR_BONUS and get_player_rank() == 1:
 		Stats.add(&"best_employee_days")
 		GameState.add_money(BEST_EMPLOYEE_BONUS)
 		GameState.notice.emit("Best employee of the day! Bonus: $%d" % BEST_EMPLOYEE_BONUS)
-	GameState.add_money(-RENT_PER_DAY)
-	Stats.add(&"rent_paid", RENT_PER_DAY)
+	var text := GameState.get_weekday_name() + "."
+	if GameState.weekday == 0:
+		GameState.add_money(-RENT_PER_WEEK)
+		Stats.add(&"rent_paid", RENT_PER_WEEK)
+		text += " Weekly rent: -$%d." % RENT_PER_WEEK
 	orders_today = 0
 	_reset_employees()
 	pick_event()
-	var text := "%s. Rent: -$%d." % [GameState.get_weekday_name(), RENT_PER_DAY]
 	if todays_event != null:
 		text += "\nTODAY: %s - %s" % [todays_event.title, todays_event.description]
 	GameState.notice.emit(text)

@@ -104,6 +104,7 @@ Map coordinates are metres, x east, z south, origin = warehouse centre.
 - **Trees**: 238 instances of `scenes/props/tree.tscn` (your tree1.glb + a trunk collider)
   placed by hand under `Town/Trees` in `world.tscn` with random rotations: rings around the
   lakes, woods and hedgerows along the fields. Move/delete/add them in the editor.
+- **Waffle Diner** (a size study): east of the main road at (178, 62), front facing south, with its parking lot; see docs/BUILDING_SIZES.md.
 - **Cliffs**: a cliff wall (about 40 m high) closes the town on every side, just behind the invisible border walls.
 - **Tunnels**: the main road leaves the map through two tunnels, north (185, -95) and west (-60, 298); each is a node under `Town/Tunnels`. The main road got two extra points so it meets the border straight.
 - **World border**: invisible walls around x -60..360, z -95..300, a huge ground slab

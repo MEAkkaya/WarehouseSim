@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/bar_couch.glb" id="1_model"]
+[ext_resource type="Material" path="res://assets/materials/leather_red.tres" id="2_leather"]
+
+[node name="BarCouch" instance=ExtResource("1_model")]
+
+[node name="leather" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_leather")

@@ -21,6 +21,8 @@ uniform float gust_scale = 0.12;
 uniform float gust_sharpness = 2.5;
 // How fast the wind direction drifts.
 uniform float turn_speed = 0.03;
+// The graphics setting "Wind": 1 = on, 0 = the grass stands still (project.godot > shader_globals).
+global uniform float wind_amount;
 
 void vertex() {
 	vec3 base = MODEL_MATRIX[3].xyz;                       // where the tuft stands
@@ -39,7 +41,7 @@ void vertex() {
 	float gust = pow(0.5 + 0.5 * sin(phase), gust_sharpness);
 	float sway = 0.1 + 1.05 * gust;
 	// Lean the blade tips (more at the top), and let them dip a little as they bend.
-	float lean = sway * wind_strength * pow(height, 1.3);
+	float lean = sway * wind_strength * pow(height, 1.3) * wind_amount;
 	vec3 offset = vec3(dir.x * lean, -lean * lean * 0.5 / max(height, 0.05), dir.y * lean);
 	VERTEX += inverse(mat3(MODEL_MATRIX)) * offset;
 }

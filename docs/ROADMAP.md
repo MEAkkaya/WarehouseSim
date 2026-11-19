@@ -51,7 +51,7 @@ Goal: the push-your-luck loop works with packing alone. Decide here whether the 
 
 ## Phase 7 - Town and economy
 - [x] Town blockout (empty buildings, road, train station under construction, lakes) - see docs/MAP.md
-- [x] Bike (placeholder; twice as fast outside, not allowed at work), rent ($40 at midnight), home with a bed, sleeping
+- [x] Bike (placeholder; twice as fast outside, not allowed at work), rent ($25 a week, charged at the midnight that starts Monday), home with a bed, sleeping
 - [x] Furniture shop (5 pieces in `data/furniture`): sleep quality, rest regen, max energy
 - [ ] SKIPPED: other vehicles (need models); fence for stolen goods (needs the stealing mechanic designed); home interior model; town culling
 - [x] Take items out of a box (R) and peel the bill off (T) to repack into another box
@@ -80,6 +80,14 @@ Goal: the push-your-luck loop works with packing alone. Decide here whether the 
 - [x] Win at $1,000,000: pause, ending text, then "keep playing" (free play) or main menu
 - [x] City furniture (no models): street lamps with night light, utility poles with cables, dashed centre lines, roadside parking bays, a park with benches and a fenced dog-park pen. The rest of the wish list is in docs/TOWN_IDEAS.md
 - [x] A cliff wall round the town with a forested plateau (about 10,500 pines with two levels of detail), higher mountains, less fog, two tunnel portals in the cliff at the ends of the main road (closed shutters for now)
+- [x] Phone on Esc: bigger, scrolling 4-per-row app grid (names on hover, icons from assets/icons/phone), Pause, Settings and Main Menu apps
+- [x] "Waffle Diner" size study built inside-out (booths, tables, stools, counter, kitchen, restroom, walls, parking): docs/BUILDING_SIZES.md
+- [x] Graphics settings for weaker PCs: presets Low/Medium/High/Custom with live options (SDFGI, SSAO, SSIL, shadows, clouds, wind, grass/forest density, render scale, MSAA), in phone Settings and the main menu
+- [ ] Later: "Auto" graphics (drop to Low when FPS stays under ~30), view distance option
+- [x] Environment pass: sky shader with clouds and warm horizon, sky ambient light, warmer sun and icier moon, AgX tonemap, SSAO + SSIL, SDFGI, foliage shader on trees and bushes (canopy-centre normals, tiny sway), smaller grass (before/after in docs/env_before_after/)
 
 ## Phase 8 - More mischief, slapstick fighting, audio, polish
 - [ ] SKIPPED (need assets or design input): audio, slapstick fighting (animations), stealing/hiding mischief, polish
+
+## Release checklist
+- [ ] Remove the Dev tools (cheats app): delete `scripts/dev/` and every `DEV-ONLY` line in `scripts/ui/phone.gd` - see docs/DEV_TOOLS.md

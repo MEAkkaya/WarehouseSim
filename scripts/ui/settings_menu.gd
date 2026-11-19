@@ -45,6 +45,39 @@ func _ready() -> void:
 		_update_labels())
 	_update_labels()
 
+	# the graphics options replace the column while they are open
+	var graphics_column := VBoxContainer.new()
+	graphics_column.custom_minimum_size = Vector2(420, 560)
+	graphics_column.add_theme_constant_override("separation", 14)
+	graphics_column.visible = false
+	add_child(graphics_column)
+	var graphics_title := Label.new()
+	graphics_title.text = "GRAPHICS"
+	graphics_title.add_theme_font_size_override("font_size", 30)
+	graphics_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	graphics_column.add_child(graphics_title)
+	var panel := GraphicsPanel.new()
+	panel.font_size = 16
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	graphics_column.add_child(panel)
+	var graphics_back := Button.new()
+	graphics_back.text = "Back"
+	graphics_back.custom_minimum_size = Vector2(0, 46)
+	graphics_back.pressed.connect(func() -> void:
+		GameSettings.save_settings()
+		graphics_column.visible = false
+		column.visible = true)
+	graphics_column.add_child(graphics_back)
+
+	var graphics_button := Button.new()
+	graphics_button.text = "Graphics..."
+	graphics_button.custom_minimum_size = Vector2(0, 46)
+	graphics_button.pressed.connect(func() -> void:
+		panel.refresh()
+		column.visible = false
+		graphics_column.visible = true)
+	column.add_child(graphics_button)
+
 	var back := Button.new()
 	back.text = "Back"
 	back.custom_minimum_size = Vector2(0, 46)

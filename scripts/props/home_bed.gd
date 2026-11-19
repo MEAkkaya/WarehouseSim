@@ -3,7 +3,7 @@ extends Interactable
 ## Your bed. Interact to lie down: the camera moves onto the mattress, the screen darkens
 ## and the clock runs fast, giving back energy (and health) as the hours go by. Interact
 ## again whenever you want to get up. The best bed you own decides how much energy a full
-## night (`night_hours`) gives (see FurnitureData). Rent is charged at midnight, so sleeping
+## night (`night_hours`) gives (see FurnitureData). The weekly rent is charged at Monday midnight, so sleeping
 ## through it costs money. Only possible when off shift.
 
 ## How many in-game hours a "full night" is: the energy of the bed is spread over this.

@@ -225,7 +225,7 @@ func _refresh_status(_unused1: Variant = null, _unused2: Variant = null) -> void
 		status_label.text = "ON SHIFT   x%.2f   unpaid $%s" % [
 				GameState.multiplier, _money(GameState.get_pending_payout())]
 	else:
-		status_label.text = "off shift"
+		status_label.text = ""   # (nothing to say while off shift)
 
 
 ## 1234567 -> "1,234,567"

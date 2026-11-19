@@ -11,6 +11,8 @@ extends Control
 ## Places, Quests, Pause (pauses the game; closing the phone resumes it), Settings
 ## (volume, fullscreen, mouse sensitivity) and Main Menu (saves and leaves).
 ##
+## A return button at the bottom middle of the phone (or Esc again) puts it away.
+##
 ## The game does NOT pause while the phone is out (unless you use the Pause app) -
 ## using it at work is a good way to get caught. Settings and Main Menu do not count as
 ## phone use for the supervisors. While it is open the mouse is free to tap the apps,
@@ -43,8 +45,11 @@ var _quests_list: VBoxContainer
 var _stats_page: Control
 var _places_page: Control
 var _settings_page: Control
+var _graphics_page: Control
+var _graphics_panel: GraphicsPanel
 var _menu_page: Control
 var _current_page: Control
+var _pages_box: Control
 var _paused_label: Label
 var _app_caption: Label
 var _volume_slider: HSlider
@@ -116,7 +121,7 @@ func close() -> void:
 	if not is_open:
 		return
 	is_open = false
-	if _current_page == _settings_page:
+	if _is_settings_page(_current_page):
 		GameSettings.save_settings()
 	if get_tree().paused:
 		get_tree().paused = false   # putting the phone away resumes a paused game
@@ -127,7 +132,12 @@ func close() -> void:
 
 ## Settings and Main Menu are not "using the phone": the supervisors do not mind.
 func counts_as_phone_use() -> bool:
-	return is_open and _current_page != _settings_page and _current_page != _menu_page
+	return is_open and not _is_settings_page(_current_page) and _current_page != _menu_page \
+			and not _current_page.has_meta("quiet")
+
+
+func _is_settings_page(page: Control) -> bool:
+	return page == _settings_page or page == _graphics_page
 
 
 func _update_phone_use() -> void:
@@ -193,13 +203,14 @@ func _money(amount: int) -> String:
 
 
 func _show_page(page: Control) -> void:
-	if _current_page == _settings_page and page != _settings_page:
+	if _is_settings_page(_current_page) and not _is_settings_page(page):
 		GameSettings.save_settings()
 	_current_page = page
 	_refresh()
-	for p in [_home_page, _bank_page, _map_page, _rules_page, _ranking_page, _stats_page, _places_page,
-			_quests_page, _settings_page, _menu_page]:
+	for p: Control in _pages_box.get_children():
 		p.visible = p == page
+	if page == _graphics_page:
+		_graphics_panel.refresh()
 	if page == _map_page:
 		_map.player = _player
 	if page == _settings_page:
@@ -218,12 +229,18 @@ func _build_ui() -> void:
 	shell.set_anchors_preset(Control.PRESET_FULL_RECT)
 	shell.add_theme_stylebox_override("panel", _style(Color(0.06, 0.06, 0.08), 30, 9))
 	add_child(shell)
+	var body := VBoxContainer.new()   # the screen, and under it the return button on the bezel
+	body.add_theme_constant_override("separation", 6)
+	shell.add_child(body)
 	var screen := PanelContainer.new()
+	screen.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	screen.add_theme_stylebox_override("panel", _style(Color(0.1, 0.14, 0.22), 22, 14))
-	shell.add_child(screen)
+	body.add_child(screen)
+	body.add_child(_make_return_button())
 	var pages := VBoxContainer.new()
 	pages.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	screen.add_child(pages)
+	_pages_box = pages
 
 	# Home: time, day and the apps
 	_home_page = VBoxContainer.new()
@@ -380,8 +397,29 @@ func _build_ui() -> void:
 		if _player != null:
 			_player.mouse_sensitivity = v
 		_update_sensitivity_label())
+	_add_spacer(_settings_page, 10)
+	var graphics_button := Button.new()
+	graphics_button.text = "Graphics..."
+	graphics_button.custom_minimum_size = Vector2(0, 40)
+	graphics_button.pressed.connect(func() -> void: _show_page(_graphics_page))
+	_settings_page.add_child(graphics_button)
 	_add_spacer(_settings_page)
 	_settings_page.add_child(_make_back_button())
+
+	# Graphics (opened from Settings): presets and every option, applied at once
+	_graphics_page = VBoxContainer.new()
+	_graphics_page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	pages.add_child(_graphics_page)
+	_make_label(_graphics_page, "GRAPHICS", 22)
+	_graphics_panel = GraphicsPanel.new()
+	_graphics_panel.font_size = 14
+	_graphics_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_graphics_page.add_child(_graphics_panel)
+	var graphics_back := Button.new()
+	graphics_back.text = "Back"
+	graphics_back.custom_minimum_size = Vector2(0, 40)
+	graphics_back.pressed.connect(func() -> void: _show_page(_settings_page))
+	_graphics_page.add_child(graphics_back)
 
 	# Main Menu app: save and leave to the main menu
 	_menu_page = VBoxContainer.new()
@@ -398,6 +436,9 @@ func _build_ui() -> void:
 	leave.pressed.connect(func() -> void: SaveGame.exit_to_main_menu())
 	_menu_page.add_child(leave)
 	_menu_page.add_child(_make_back_button())
+
+	if DevPage.AVAILABLE:   # DEV-ONLY (delete this line and _build_dev_app below before release)
+		_build_dev_app(apps, pages)   # DEV-ONLY
 
 
 ## Rebuilds the quest list: every quest with its title and (if it has one) description.
@@ -508,6 +549,24 @@ func _refresh_paused_label() -> void:
 	_paused_label.text = "GAME PAUSED" if get_tree().paused else ""
 
 
+## The return button at the bottom middle of the phone (like a phone's home bar): a click puts
+## the phone away, from any page. Esc does the same. It takes no keyboard focus, so Space or
+## Enter never presses it by accident.
+func _make_return_button() -> CenterContainer:
+	var row := CenterContainer.new()
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(76, 20)
+	button.focus_mode = Control.FOCUS_NONE
+	button.tooltip_text = "Put the phone away (Esc)"
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.add_theme_stylebox_override("normal", _style(Color(0.42, 0.44, 0.5), 10, 0))
+	button.add_theme_stylebox_override("hover", _style(Color(0.68, 0.7, 0.76), 10, 0))
+	button.add_theme_stylebox_override("pressed", _style(Color(0.95, 0.96, 1.0), 10, 0))
+	button.pressed.connect(close)
+	row.add_child(button)
+	return row
+
+
 ## Every app's Back button returns to the home screen (Esc puts the phone away).
 func _make_back_button() -> Button:
 	var button := Button.new()
@@ -529,3 +588,21 @@ func _make_slider(parent: Control, low: float, high: float, step: float) -> HSli
 
 func _update_sensitivity_label() -> void:
 	_sensitivity_label.text = "Mouse sensitivity (%.1f)" % (GameSettings.mouse_sensitivity / 0.0025)
+
+
+# DEV-ONLY ------------------------------------------------------------------------------------
+# The "Dev" app (cheats). DELETE this function, the two lines that call it in _build_ui and the
+# folder scripts/dev/ before publishing the game. See docs/DEV_TOOLS.md.
+func _build_dev_app(apps: GridContainer, pages: Control) -> void:
+	var page := VBoxContainer.new()
+	page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.set_meta("quiet", true)   # (the supervisors do not count it as phone use)
+	pages.add_child(page)
+	_make_label(page, "DEV TOOLS", 22)
+	var dev := DevPage.new()
+	dev.player = _player
+	dev.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	dev.teleported.connect(close)
+	page.add_child(dev)
+	page.add_child(_make_back_button())
+	_add_app(apps, "dev", "DEV", func() -> void: _show_page(page))

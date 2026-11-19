@@ -320,9 +320,9 @@ func _build_vegetation() -> void:
 	_scatter(TownLayout.BOUNDS, OPEN_TREE, OPEN_BUSH, OPEN_GRASS, trees, bushes, grass, tree_points)
 	_border_belt(trees, bushes, tree_points)
 	_lake_shores(bushes, grass)
-	_batch(TREE, trees, view_distance, true)
-	_batch(BUSH, bushes, view_distance * 0.7, false)
-	_batch(GRASS, grass, view_distance * 0.4, false, _wind_material())
+	_batch(TREE, trees, view_distance, true, null, 0.05)    # (the crowns get the foliage shader)
+	_batch(BUSH, bushes, view_distance * 0.7, false, null, 0.025)
+	_batch(GRASS, grass, view_distance * 0.4, false, _wind_material(), 0.0, "grass")   # (thinned by the graphics setting)
 	_counts.tree = trees.size()
 	_counts.bush = bushes.size()
 	_counts.grass = grass.size()
@@ -394,7 +394,7 @@ func _try_grass(p: Vector2, grass: Array[Transform3D]) -> bool:
 	if not _is_free(p, 0):
 		return false
 	_take(p, 0)
-	var size_scale := _rng.randf_range(0.28, 0.6)
+	var size_scale := _rng.randf_range(0.2, 0.45)
 	var basis := Basis(Vector3.UP, _rng.randf() * TAU).scaled_local(Vector3(size_scale, size_scale * _rng.randf_range(0.7, 1.1), size_scale))
 	grass.append(Transform3D(basis, Vector3(p.x, G, p.y)))
 	return true
@@ -470,11 +470,13 @@ func _wind_material() -> ShaderMaterial:
 
 ## Draws `transforms` copies of every mesh of the model, as MultiMesh chunks.
 func _batch(model_path: String, transforms: Array[Transform3D], visible_range: float,
-		shadows: bool, material: Material = null) -> void:
+		shadows: bool, material: Material = null, foliage_sway: float = 0.0, thin_kind: String = "") -> void:
 	if transforms.is_empty():
 		return
 	var root := (load(model_path) as PackedScene).instantiate() as Node3D
 	var parts: Array[Dictionary] = []
+	# (leaf parts of trees and bushes get the foliage shader: normals from the canopy centre, a tiny sway)
+	var leaf_materials := Foliage.make_materials(root, foliage_sway) if foliage_sway > 0.0 else {}
 	for node in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
 		# The mesh's place inside the model (the .glb nodes can be moved and scaled).
@@ -483,7 +485,7 @@ func _batch(model_path: String, transforms: Array[Transform3D], visible_range: f
 		while walker != root:
 			local = (walker as Node3D).transform * local
 			walker = walker.get_parent()
-		parts.append({"mesh": mesh_instance.mesh, "local": local})
+		parts.append({"mesh": mesh_instance.mesh, "local": local, "material": leaf_materials.get(mesh_instance)})
 	root.free()
 	var chunks := {}
 	for t in transforms:
@@ -506,7 +508,9 @@ func _batch(model_path: String, transforms: Array[Transform3D], visible_range: f
 			var holder := MultiMeshInstance3D.new()
 			holder.name = "Chunk_%d_%d" % [key.x, key.y]
 			holder.multimesh = multimesh
-			if material != null:
+			if part.material != null:
+				holder.material_override = part.material
+			elif material != null:
 				holder.material_override = material
 			holder.visibility_range_end = visible_range
 			holder.visibility_range_end_margin = 20.0
@@ -514,3 +518,5 @@ func _batch(model_path: String, transforms: Array[Transform3D], visible_range: f
 			if not shadows:
 				holder.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			group.add_child(holder)
+			if thin_kind != "":
+				Graphics.register_thinnable(holder, thin_kind)

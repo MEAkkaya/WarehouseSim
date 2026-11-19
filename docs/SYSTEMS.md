@@ -117,6 +117,20 @@ can be climbed without knocking the stock off.
   Still numbers in TownLayout: the playable area, the neighbourhood zone, the woods, KEEP_OUT.
 - Data you can edit in the Inspector without code: data/items, data/events, data/furniture.
 
+- **Graphics settings** (`scripts/core/game_settings.gd` data + presets, `scripts/core/graphics.gd` autoload `Graphics`, `scripts/ui/graphics_panel.gd` UI): Low / Medium / High / Custom and
+  every option behind them, in the phone's Settings app > "Graphics..." and in the main menu's Settings. Everything applies live, no restart; saved in `user://settings.cfg` ([graphics]).
+  Options: SDFGI, SSAO, SSIL (Environment flags), sun shadows (off/low/medium/high: atlas size, distance, softness), clouds and wind (two shader globals in project.godot
+  `[shader_globals]`: `sky_clouds`, `wind_amount`, read by sky_clouds / foliage / grass_wind shaders), grass and distant forest density (`MultiMesh.visible_instance_count`, the scatter order is random so
+  it thins evenly; `Graphics.register_thinnable(holder, "grass"|"forest")`), render scale (FSR below 100%) and MSAA. DayNightCycle registers the Environment and sun. Not covered (need
+  a restart or a different export): the rendering method (Forward+ / Mobile / Compatibility; Compatibility has no SDFGI/SSAO/SSIL).
+- **Sky, light and look** (world.tscn Environment, `day_night_cycle.gd`, `assets/shaders/sky_clouds.gdshader`, `foliage.gdshader`): the sky is a shader (gradient with
+  a warm horizon at sunrise/sunset, drifting clouds lit from the sun's side, sun and moon discs, a few stars at night); DayNightCycle feeds it the time of day and its colours are
+  exports of that node (`cloud_cover` too). The sky also lights the world (ambient light source = Sky) and the fog takes the horizon colour (`fog_sky_affect` 0, or the fog
+  would hide the sky). Sun: warm white at noon, orange when low. Moon: icy blue. Rendering: AgX tonemap (exposure 1.1, AgX contrast 1.3), SSAO (radius 1.4, intensity 2.4),
+  SSIL (radius 6), SDFGI (energy 1.3). Foliage: the crown parts (green) of tree1/tree2/bush1 get the foliage shader through `Foliage` (`foliage.gd`): normals from the canopy centre
+  (smooth round shading on a low-poly crown, darker underside) and a tiny sway of the outer leaves, each tree out of step. Hand-placed trees do it in `FoliageTree`
+  (the script on tree.tscn); the batches (TownScenery, HillForest) get the same materials. Grass tufts are 0.2-0.45 (they were 0.28-0.6). Before/after pictures:
+  docs/env_before_after/.
 - **Landscape, cliffs and tunnels** (`landscape.gd`, `hill_forest.gd`, `scenes/props/tunnel.tscn`): the town's sharp border is a CLIFF wall all
   round it (a metre or two behind the invisible walls it rises 32-46 m within 5 m, with a meandering lip, rock strata and streaks painted on the face),
   with a forested plateau on top that falls away gently, and mountain ranges (`max_height` 170 m) further out. One generated mesh (a RING of
@@ -202,7 +216,7 @@ New event = a script + a .tres, no other changes.
 ## Sleeping, notifications, box details
 - **Sleeping** (`HomeBed`): interact with the bed -> the camera lies on the mattress (Player.sleep_blend / sleep_eye), the screen dims and the
   clock runs at 30 in-game minutes per second. Energy (the bed's `sleep_restore` per 8 h night) and health come back as the hours pass.
-  Left click gets you up at any time. Midnight still charges rent.
+  Left click gets you up at any time. The weekly rent (Monday midnight) is still charged.
 - **Order results** (belt check) appear as a small "achievement" box that slides down from the top centre (`PlayerHUD.show_achievement`);
   other notices stay above the hotbar (`show_message`).
 - **Carried box**: its details (size, space, weight, contents, bill) are listed on the right side, half transparent

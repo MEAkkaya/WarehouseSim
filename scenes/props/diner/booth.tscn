@@ -1,0 +1,68 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/diner/bar_couch.tscn" id="couch"]
+
+[sub_resource type="StandardMaterial3D" id="M_table_top"]
+albedo_color = Color(0.86, 0.83, 0.7, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="M_steel"]
+albedo_color = Color(0.75, 0.77, 0.8, 1)
+roughness = 0.35
+metallic = 0.7
+
+[sub_resource type="BoxMesh" id="BM_2"]
+material = SubResource("M_table_top")
+size = Vector3(0.75, 0.04, 1.7)
+
+[sub_resource type="BoxMesh" id="BM_3"]
+material = SubResource("M_steel")
+size = Vector3(0.08, 0.72, 0.08)
+
+[sub_resource type="BoxMesh" id="BM_4"]
+material = SubResource("M_steel")
+size = Vector3(0.45, 0.03, 0.35)
+
+[sub_resource type="BoxShape3D" id="BS_5"]
+size = Vector3(0.56, 0.65, 1.8)
+
+[sub_resource type="BoxShape3D" id="BS_6"]
+size = Vector3(0.75, 0.78, 1.7)
+
+[node name="Booth" type="StaticBody3D"]
+
+[node name="BenchLCouch1" parent="." instance=ExtResource("couch")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.645, 0, -0.45)
+
+[node name="BenchLCouch2" parent="." instance=ExtResource("couch")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.645, 0, 0.45)
+
+[node name="BenchRCouch1" parent="." instance=ExtResource("couch")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0.645, 0, -0.45)
+
+[node name="BenchRCouch2" parent="." instance=ExtResource("couch")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0.645, 0, 0.45)
+
+[node name="TableTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, 0)
+mesh = SubResource("BM_2")
+
+[node name="TablePost" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36, 0)
+mesh = SubResource("BM_3")
+
+[node name="TableBase" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+mesh = SubResource("BM_4")
+
+[node name="CollisionBenchL" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.655, 0.325, 0)
+shape = SubResource("BS_5")
+
+[node name="CollisionBenchR" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.655, 0.325, 0)
+shape = SubResource("BS_5")
+
+[node name="CollisionTable" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.39, 0)
+shape = SubResource("BS_6")

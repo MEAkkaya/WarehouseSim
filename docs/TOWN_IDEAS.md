@@ -27,6 +27,8 @@ Status: DONE / PARTLY / LATER (needs models, or needs a design decision).
 ## Systems
 - **Wallet and bank account** (ATM on the street): cash in the wallet vs money in the bank. Today there is only
   the bank (phone app); the ATM would let you withdraw/deposit, and some shops/venues only take cash. LATER.
+- **Size reference**: a first building was built from the inside out to learn real sizes: the "Waffle Diner" (14.4 x 10.4 m, 67 seats, round corner counter, kitchen, restroom,
+  parking), see docs/BUILDING_SIZES.md. It is a size study for now: nothing in it works yet (no food, no staff).
 - **Food as energy sources**: a fast-food restaurant (cheap energy) and a high-end restaurant (expensive,
   luxury food: bigger energy, status). LATER.
 - **Gas station**: open 24/7, expensive and low quality goods (no fuelling: there are no vehicles to fuel). LATER.
